@@ -12,6 +12,15 @@
     
     
     <item>
+      <title>About</title>
+      <link>/about/</link>
+      <pubDate>Sun, 07 May 2017 00:00:00 +0000</pubDate>
+      
+      <guid>/about/</guid>
+      <description>Frederick Boehm is a biostatistics researcher and teacher who lives in Madison, Wisconsin.</description>
+    </item>
+    
+    <item>
       <title>Getting started with blogdown</title>
       <link>/2017/05/07/getting-started-with-blogdown/</link>
       <pubDate>Sun, 07 May 2017 00:00:00 +0000</pubDate>
@@ -28,15 +37,6 @@
       <guid>/2016/12/30/a-plain-markdown-post/</guid>
       <description>This is a post written in plain Markdown (*.md) instead of R Markdown (*.Rmd). The major differences are:
  You cannot run any R code in a plain Markdown document, whereas in an R Markdown document, you can embed R code chunks (```{r}); A plain Markdown post is rendered through Blackfriday, and an R Markdown document is compiled by rmarkdown and Pandoc.  There are many differences in syntax between Blackfriday&amp;rsquo;s Markdown and Pandoc&amp;rsquo;s Markdown.</description>
-    </item>
-    
-    <item>
-      <title>About</title>
-      <link>/about/</link>
-      <pubDate>Thu, 05 May 2016 21:48:51 -0700</pubDate>
-      
-      <guid>/about/</guid>
-      <description>This is a &amp;ldquo;hello world&amp;rdquo; example website for the blogdown package. The theme was forked from @jrutheiser/hugo-lithium-theme and modified by Yihui Xie.</description>
     </item>
     
     <item>
