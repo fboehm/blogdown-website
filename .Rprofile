@@ -1,0 +1,1 @@
+options(blogdown.rmd = TRUE, blogdown.author = "Frederick Boehm")
