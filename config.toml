@@ -3,7 +3,7 @@ relativeurls = true
 languageCode = "en-us"
 title = "Frederick Boehm's Website"
 theme = "hugo-lithium-theme"
-googleAnalytics = ""
+googleAnalytics = "UA-46757486-5"
 disqusShortname = "fboehm"
 ignoreFiles = ["\\.Rmd$", "_files$", "_cache$"]
 
@@ -33,7 +33,7 @@ ignoreFiles = ["\\.Rmd$", "_files$", "_cache$"]
     MathJaxVersion = "2.7.1"
 
     [params.logo]
-    url = "boehm.png"
+    url = "logo.png"
     width = 50
     height = 50
     alt = "Logo"
