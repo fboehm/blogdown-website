@@ -14,8 +14,7 @@ googleAnalytics = "UA-46757486-5"
   description = ""
   copyright = "&copy;2017 Frederick Boehm"
   sidebarAbout = [
-    "I am a biostatistics researcher.",
-    "Originally from Stevens Point, Wisconsin, currently based in Madison, Wisconsin."
+    "I am a a biostatistics researcher and teacher who lives in Madison, Wisconsin."
   ]
   # Contact page
      # Since this template is static, the contact form uses www.formspree.io as a
