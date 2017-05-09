@@ -1,52 +1,40 @@
-baseurl = "https://fboehm.us/"
-title = "Frederick Boehm's Website"
-theme = "blogdown"
+baseurl = "/"
+relativeurls = true
 languageCode = "en-us"
-# Enable comments by entering your Disqus shortname
+title = "Frederick Boehm's Website"
+theme = "hugo-lithium-theme"
+googleAnalytics = ""
 disqusShortname = "fboehm"
-# Enable Google Analytics by entering your tracking code
-googleAnalytics = "UA-46757486-5"
+ignoreFiles = ["\\.Rmd$", "_files$", "_cache$"]
+
+[permalinks]
+    post = "/:year/:month/:day/:slug/"
+
+[[menu.main]]
+    name = "About"
+    url = "/about/"
+[[menu.main]]
+    name = "GitHub"
+    url = "https://github.com/fboehm/blogdown-website"
+[[menu.main]]
+    name = "Twitter"
+    url = "https://twitter.com/FredBoehm128"
 
 [params]
-  # Style options: default (pink), blue, green, pink, red, sea, violet
-  # Use custom.css for your custom styling
-  style = "default"
-  description = ""
-  copyright = "&copy;2017 Frederick Boehm"
-  sidebarAbout = [
-    "I am a a biostatistics researcher and teacher who lives in Madison, Wisconsin."
-  ]
-  # Contact page
-     # Since this template is static, the contact form uses www.formspree.io as a
-     # proxy. The form makes a POST request to their servers to send the actual
-     # email. Visitors can send up to a 1000 emails each month for free.
-     #
-     # What you need to do for the setup?
-     #
-     # - set your email address under 'email' below
-     # - upload the generated site to your server
-     # - send a dummy email yourself to confirm your account
-     # - click the confirm link in the email from www.formspree.io
-     # - you're done. Happy mailing!
-  email = "fred@fboehm.us"
+    description = "Frederick Boehm's Website."
 
-  # Nav links in the side bar
-  [[params.navlinks]]
-  name = "Home"
-  url = ""
+    # options for highlight.js (version, additional languages, and theme)
+    highlightjsVersion = "9.11.0"
+    highlightjsCDN = "//cdn.bootcss.com"
+    highlightjsLang = ["r", "yaml"]
+    highlightjsTheme = "github"
 
-  [[params.navlinks]]
-  name = "About"
-  url = "about/"
+    MathJaxCDN = "//cdn.bootcss.com"
+    MathJaxVersion = "2.7.1"
 
-  [[params.navlinks]]
-  name = "Get in touch"
-  url = "contact/"
+    [params.logo]
+    url = "boehm.png"
+    width = 50
+    height = 50
+    alt = "Logo"
 
-  [params.social]
-  email         = "fred@fboehm.us"
-  twitter       = "FredBoehm128"
-  linkedin      = "full profile url in linkedin"
-  stackoverflow = "full profile url in stackoverflow"
-  instagram     = "full profile url in instagram"
-  github        = "https://github.com/fboehm"

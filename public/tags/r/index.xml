@@ -6,7 +6,6 @@
     <description>Recent content in R on Frederick Boehm&#39;s Website</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <copyright>&amp;copy;2017 Frederick Boehm</copyright>
     <lastBuildDate>Sun, 07 May 2017 00:00:00 +0000</lastBuildDate>
     
 	<atom:link href="/tags/r/index.xml" rel="self" type="application/rss+xml" />
@@ -14,10 +13,10 @@
     
     <item>
       <title>Getting started with blogdown</title>
-      <link>/post/getting-started-with-blogdown/</link>
+      <link>/2017/05/07/getting-started-with-blogdown/</link>
       <pubDate>Sun, 07 May 2017 00:00:00 +0000</pubDate>
       
-      <guid>/post/getting-started-with-blogdown/</guid>
+      <guid>/2017/05/07/getting-started-with-blogdown/</guid>
       <description>While browsing the internet, I stumbled upon Rstudio’s new package blogdown. I read posts from Karl Broman and found the the book that the package authors - Yihui Xie and Amber Thomas - freely share.
 One tricky part of setting up the website involved the DNS settings. I bought the site fboehm.us through google domains. While the blogdown book provides instructions for DNS settings for other domain name providers, at the time I set up my site, they hadn’t written instructions for use with google domains.</description>
     </item>
