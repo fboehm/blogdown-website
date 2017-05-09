@@ -1,6 +1,6 @@
 baseurl = "https://fboehm.us/"
 title = "Frederick Boehm's Website"
-theme = "hugo-creative-portfolio-theme"
+theme = "blogdown"
 languageCode = "en-us"
 # Enable comments by entering your Disqus shortname
 disqusShortname = "fboehm"
