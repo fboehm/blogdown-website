@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes" ?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>R on Frederick Boehm&#39;s Website</title>
-    <link>/categories/r/</link>
-    <description>Recent content in R on Frederick Boehm&#39;s Website</description>
+    <title>Linear Mixed Effects Models on Frederick Boehm&#39;s Website</title>
+    <link>/tags/linear-mixed-effects-models/</link>
+    <description>Recent content in Linear Mixed Effects Models on Frederick Boehm&#39;s Website</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <lastBuildDate>Tue, 16 May 2017 00:00:00 +0000</lastBuildDate>
     
-	<atom:link href="/categories/r/index.xml" rel="self" type="application/rss+xml" />
+	<atom:link href="/tags/linear-mixed-effects-models/index.xml" rel="self" type="application/rss+xml" />
     
     
     <item>
@@ -19,16 +19,6 @@
       <guid>/2017/05/16/gemma-em-in-r/</guid>
       <description>I need to estimate variance components for a linear mixed effects model. Specifically, I need to consider the model, from Zhou and Stephens (2014):
 \[Y = BX + G + E\] where \(Y\) is a \(2\) by \(n\) matrix of (possibly correlated) phenotypes (for \(n\) subjects), \(B\) is a \(2\) by \(c\) matrix of allelic effect sizes (where \(c\) denotes the number of alleles per locus), \(X\) is a \(c\) by \(n\) matrix containing genotypes (or genotype probabilities), \(G\) is a \(2\) by \(n\) matrix of random effects and \(E\) is a \(2\) by \(n\) matrix of random errors, which are assumed to be independent of \(G\).</description>
-    </item>
-    
-    <item>
-      <title>Getting started with blogdown</title>
-      <link>/2017/05/07/getting-started-with-blogdown/</link>
-      <pubDate>Sun, 07 May 2017 00:00:00 +0000</pubDate>
-      
-      <guid>/2017/05/07/getting-started-with-blogdown/</guid>
-      <description>While browsing the internet, I stumbled upon Rstudio’s new package blogdown. I read posts from Karl Broman and found the the book that the package authors - Yihui Xie and Amber Thomas - freely share.
-One tricky part of setting up the website involved the DNS settings. I bought the site fboehm.us through google domains. While the blogdown book provides instructions for DNS settings for other domain name providers, at the time I set up my site, they hadn’t written instructions for use with google domains.</description>
     </item>
     
   </channel>
