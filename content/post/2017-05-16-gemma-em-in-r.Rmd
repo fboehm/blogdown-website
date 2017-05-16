@@ -1,0 +1,19 @@
+---
+title: GEMMA's EM algorithm implemented in R
+author: Frederick Boehm
+date: '2017-05-16'
+categories:
+  - R
+tags:
+  - R
+  - EM algorithm
+  - Variance components
+  - Genetics
+slug: gemma-em-in-r
+bibliography: blog.bib
+---
+
+
+
+## References
+
