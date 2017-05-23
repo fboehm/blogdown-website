@@ -9,6 +9,7 @@ ignoreFiles = ["\\.Rmd$", "_files$", "_cache$"]
 
 [permalinks]
     post = "/:year/:month/:day/:slug/"
+    page = "/:title/"
 
 [[menu.main]]
     name = "About"
@@ -25,6 +26,13 @@ ignoreFiles = ["\\.Rmd$", "_files$", "_cache$"]
 [[menu.main]]
     name = "Twitter"
     url = "https://twitter.com/FredBoehm128"
+
+[social]
+  # Link your social networking accounts to the side menu
+  # by entering your username or ID.
+
+  # SNS microblogging
+  twitter = "FredBoehm128"
 
 [params]
     description = "Frederick Boehm's Website."
