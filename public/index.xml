@@ -6,10 +6,46 @@
     <description>Recent content on Frederick Boehm&#39;s Website</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Tue, 23 May 2017 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Tue, 23 May 2017 16:28:03 -0500</lastBuildDate>
     
 	<atom:link href="/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>Curriculum Vitae</title>
+      <link>/cv/</link>
+      <pubDate>Tue, 23 May 2017 16:28:03 -0500</pubDate>
+      
+      <guid>/cv/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Curriculum Vitae</title>
+      <link>/cv.knit/</link>
+      <pubDate>Tue, 23 May 2017 16:28:03 -0500</pubDate>
+      
+      <guid>/cv.knit/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Curriculum Vitae</title>
+      <link>/cv.utf8/</link>
+      <pubDate>Tue, 23 May 2017 16:28:03 -0500</pubDate>
+      
+      <guid>/cv.utf8/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>research</title>
+      <link>/research/</link>
+      <pubDate>Tue, 23 May 2017 16:26:03 -0500</pubDate>
+      
+      <guid>/research/</guid>
+      <description></description>
+    </item>
     
     <item>
       <title>Deciphering GEMMA’s C&#43;&#43; Code</title>
@@ -20,15 +56,6 @@
       <description>My goal is to translate the C++ code in GEMMA/src/mvlmm.cpp to mathematical notation and, ultimately, to R code. Zhou’s C++ code uses the gsl C++ library.
 Let’s examine the function CalcXHiY which runs from line 357-384 of mvlmm.cpp. I reproduce them here:
 void CalcXHiY(const gsl_vector *eval, const gsl_vector *D_l, const gsl_matrix *X, const gsl_matrix *UltVehiY, gsl_vector *xHiy) { size_t n_size=eval-&amp;gt;size, c_size=X-&amp;gt;size1, d_size=D_l-&amp;gt;size; gsl_vector_set_zero (xHiy); double x, delta, dl, y, d; for (size_t i=0; i&amp;lt;d_size; i++) { dl=gsl_vector_get(D_l, i); for (size_t j=0; j&amp;lt;c_size; j++) { d=0.</description>
-    </item>
-    
-    <item>
-      <title>CV</title>
-      <link>/cv/</link>
-      <pubDate>Sun, 21 May 2017 00:00:00 +0000</pubDate>
-      
-      <guid>/cv/</guid>
-      <description>Frederick Boehm.</description>
     </item>
     
     <item>
