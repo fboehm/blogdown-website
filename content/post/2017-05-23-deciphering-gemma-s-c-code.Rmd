@@ -79,6 +79,43 @@ The code immediately above means that the value `d` is inserted into vector `xHi
 gsl_vector_set_zero (xHiy);
 ```
 
+The line 
+
+```{rcpp, eval = FALSE}
+x=gsl_matrix_get(X, j, k);
+```
+
+assigns to the value `x` the $(j, k)^{th}$ element of matrix X. 
+
+
+```{rcpp, eval = FALSE}
+y=gsl_matrix_get(UltVehiY, i, k);
+```
+
+assigns to `y` the $(i, k)^{th}$ element of `UltVehiY`. 
+
+Presumably `eval` is Zhou's abbreviation of eigenvalues. `d` then is the $k^{th}$ eigenvalue from the decomposition of the kinship matrix.
+
+`x*y`, refers to the product of two numbers. 
+
+```{rcpp, eval = FALSE}
+d+=x*y/(delta*dl+1.0);
+```
+
+defines `d` to be the sum of the current value of `d` and `x*y/(delta*dl+1.0)`. In R, we would write this as:
+
+```{r, eval = FALSE}
+d <- d + x * y / (delta * dl + 1)
+```
+
+Note that each time we restart the loop over `k` we reset the value of `d` to zero. Note also that `1.0` is the value of every eigenvalue of the identity matrix. 
+
+The use of `1.0` rather than merely `1` seems peculiar to me - I'm new to C++. I imagine that `1` and `1.0` might be stored differently, which might justify the use of `1.0` over `1`. 
+
+Since we're looping over `k`, it's as if we're taking the inner (dot) product of two vectors and defining it to be the number `d`. 
+
+
+
 
 
 

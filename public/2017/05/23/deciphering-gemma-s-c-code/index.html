@@ -59,7 +59,7 @@
 
   <article class="article">
     
-    <span class="article-duration">2 min read</span>
+    <span class="article-duration">3 min read</span>
     
 
     <h1 class="article-title">Deciphering GEMMA’s C&#43;&#43; Code</h1>
@@ -115,6 +115,19 @@
 <p>The code immediately above means that the value <code>d</code> is inserted into vector <code>xHiy</code> at position <code>j*d_size+i</code>.</p>
 <p><a href="https://github.com/xiangzhou/GEMMA/blob/793ba025de8e71b49e738613e8dd9bbdd06389d4/src/mvlmm.cpp#L361">One of the first lines</a> in the function creates the vector <code>xHiy</code> and sets all of its entries to zero:</p>
 <pre class="rcpp"><code>gsl_vector_set_zero (xHiy);</code></pre>
+<p>The line</p>
+<pre class="rcpp"><code>x=gsl_matrix_get(X, j, k);</code></pre>
+<p>assigns to the value <code>x</code> the <span class="math inline">\((j, k)^{th}\)</span> element of matrix X.</p>
+<pre class="rcpp"><code>y=gsl_matrix_get(UltVehiY, i, k);</code></pre>
+<p>assigns to <code>y</code> the <span class="math inline">\((i, k)^{th}\)</span> element of <code>UltVehiY</code>.</p>
+<p>Presumably <code>eval</code> is Zhou’s abbreviation of eigenvalues. <code>d</code> then is the <span class="math inline">\(k^{th}\)</span> eigenvalue from the decomposition of the kinship matrix.</p>
+<p><code>x*y</code>, refers to the product of two numbers.</p>
+<pre class="rcpp"><code>d+=x*y/(delta*dl+1.0);</code></pre>
+<p>defines <code>d</code> to be the sum of the current value of <code>d</code> and <code>x*y/(delta*dl+1.0)</code>. In R, we would write this as:</p>
+<pre class="r"><code>d &lt;- d + x * y / (delta * dl + 1)</code></pre>
+<p>Note that each time we restart the loop over <code>k</code> we reset the value of <code>d</code> to zero. Note also that <code>1.0</code> is the value of every eigenvalue of the identity matrix.</p>
+<p>The use of <code>1.0</code> rather than merely <code>1</code> seems peculiar to me - I’m new to C++. I imagine that <code>1</code> and <code>1.0</code> might be stored differently, which might justify the use of <code>1.0</code> over <code>1</code>.</p>
+<p>Since we’re looping over <code>k</code>, it’s as if we’re taking the inner (dot) product of two vectors and defining it to be the number <code>d</code>.</p>
 
     </div>
   </article>
