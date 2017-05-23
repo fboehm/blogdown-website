@@ -14,3 +14,5 @@ tags:
   - R
 ---
 
+My goal is to  translate the C++ code in [`GEMMA/src/mvlmm.cpp`](https://github.com/xiangzhou/GEMMA/blob/master/src/mvlmm.cpp) to mathematical notation and, ultimately, to R code.
+

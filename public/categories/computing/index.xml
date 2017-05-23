@@ -17,7 +17,7 @@
       <pubDate>Tue, 23 May 2017 00:00:00 +0000</pubDate>
       
       <guid>/2017/05/23/deciphering-gemma-s-c-code/</guid>
-      <description></description>
+      <description>My goal is to translate the C++ code in GEMMA/src/mvlmm.cpp to mathematical notation and, ultimately, to R code.</description>
     </item>
     
   </channel>
