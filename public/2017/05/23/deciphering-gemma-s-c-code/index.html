@@ -59,7 +59,7 @@
 
   <article class="article">
     
-    <span class="article-duration">1 min read</span>
+    <span class="article-duration">2 min read</span>
     
 
     <h1 class="article-title">Deciphering GEMMA’s C&#43;&#43; Code</h1>
@@ -110,6 +110,11 @@
 <p>From reading the documentation for these four functions - <a href="https://www.gnu.org/software/gsl/manual/html_node/Accessing-matrix-elements.html">here</a> and <a href="https://www.gnu.org/software/gsl/manual/html_node/Accessing-vector-elements.html">here</a> - my understanding is that the functions whose names end in <code>get</code> return a subset of an existing matrix or vector. For instance, the line from above:</p>
 <pre class="cpp"><code>dl=gsl_vector_get(D_l, i);</code></pre>
 <p>assigns to <code>dl</code> the <span class="math inline">\(i^{th}\)</span> element of the vector <code>D_l</code>.</p>
+<p>The functions that end in <code>set</code> assign a value to a given element of a matrix or vector. <code>gsl_vector_set</code> requires 3 arguments, since we need to know the name of the vector, which element is to be replaced, and the value to insert at the position of replacement.</p>
+<pre class="rcpp"><code>gsl_vector_set(xHiy, j*d_size+i, d);</code></pre>
+<p>The code immediately above means that the value <code>d</code> is inserted into vector <code>xHiy</code> at position <code>j*d_size+i</code>.</p>
+<p><a href="https://github.com/xiangzhou/GEMMA/blob/793ba025de8e71b49e738613e8dd9bbdd06389d4/src/mvlmm.cpp#L361">One of the first lines</a> in the function creates the vector <code>xHiy</code> and sets all of its entries to zero:</p>
+<pre class="rcpp"><code>gsl_vector_set_zero (xHiy);</code></pre>
 
     </div>
   </article>

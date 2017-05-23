@@ -65,5 +65,20 @@ dl=gsl_vector_get(D_l, i);
 
 assigns to `dl` the $i^{th}$ element of the vector `D_l`.
 
+The functions that end in `set` assign a value to a given element of a matrix or vector. `gsl_vector_set` requires 3 arguments, since we need to know the name of the vector, which element is to be replaced, and the value to insert at the position of replacement. 
+
+```{rcpp, eval = FALSE}
+gsl_vector_set(xHiy, j*d_size+i, d);
+```
+
+The code immediately above means that the value `d` is inserted into vector `xHiy` at position `j*d_size+i`. 
+
+[One of the first lines](https://github.com/xiangzhou/GEMMA/blob/793ba025de8e71b49e738613e8dd9bbdd06389d4/src/mvlmm.cpp#L361) in the function creates the vector `xHiy` and sets all of its entries to zero:
+
+```{rcpp, eval = FALSE}
+gsl_vector_set_zero (xHiy);
+```
+
+
 
 
