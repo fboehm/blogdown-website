@@ -19,6 +19,11 @@
 
 
 
+
+<link href='//cdn.bootcss.com/highlight.js/9.11.0/styles/github.min.css' rel='stylesheet' type='text/css' />
+
+
+
 <link rel="stylesheet" href="../../../../css/fonts.css" media="all">
 <link rel="stylesheet" href="../../../../css/main.css" media="all">
 
@@ -64,7 +69,47 @@
     
 
     <div class="article-content">
-      <p>My goal is to translate the C++ code in <a href="https://github.com/xiangzhou/GEMMA/blob/master/src/mvlmm.cpp"><code>GEMMA/src/mvlmm.cpp</code></a> to mathematical notation and, ultimately, to R code.</p>
+      <p>My goal is to translate the C++ code in <a href="https://github.com/xiangzhou/GEMMA/blob/master/src/mvlmm.cpp"><code>GEMMA/src/mvlmm.cpp</code></a> to mathematical notation and, ultimately, to R code. Zhou’s C++ code uses the gsl C++ library.</p>
+<p>Let’s examine the function <code>CalcXHiY</code> which runs from line <a href="https://github.com/xiangzhou/GEMMA/blob/793ba025de8e71b49e738613e8dd9bbdd06389d4/src/mvlmm.cpp#L357-L384">357-384</a> of <code>mvlmm.cpp</code>. I reproduce them here:</p>
+<pre class="cpp"><code>void CalcXHiY(const gsl_vector *eval, const gsl_vector *D_l, const gsl_matrix *X, const gsl_matrix *UltVehiY, gsl_vector *xHiy)
+{
+    size_t n_size=eval-&gt;size, c_size=X-&gt;size1, d_size=D_l-&gt;size;
+
+    gsl_vector_set_zero (xHiy);
+
+    double x, delta, dl, y, d;
+    for (size_t i=0; i&lt;d_size; i++) {
+        dl=gsl_vector_get(D_l, i);
+        for (size_t j=0; j&lt;c_size; j++) {
+            d=0.0;
+            for (size_t k=0; k&lt;n_size; k++) {
+                x=gsl_matrix_get(X, j, k);
+                y=gsl_matrix_get(UltVehiY, i, k);
+                delta=gsl_vector_get(eval, k);
+                d+=x*y/(delta*dl+1.0);
+            }
+            gsl_vector_set(xHiy, j*d_size+i, d);
+        }
+    }
+    /*
+    cout&lt;&lt;&quot;xHiy: &quot;&lt;&lt;endl;
+    for (size_t i=0; i&lt;(d_size*c_size); i++) {
+        cout&lt;&lt;gsl_vector_get(xHiy, i)&lt;&lt;endl;
+    }
+     */
+    return;
+}
+</code></pre>
+<p>We see that Zhou uses four gsl functions repeatedly:</p>
+<ol style="list-style-type: decimal">
+<li><code>gsl_matrix_get</code></li>
+<li><code>gsl_matrix_set</code></li>
+<li><code>gsl_vector_set</code></li>
+<li><code>gsl_vector_get</code></li>
+</ol>
+<p>From reading the documentation for these four functions - <a href="https://www.gnu.org/software/gsl/manual/html_node/Accessing-matrix-elements.html">here</a> and <a href="https://www.gnu.org/software/gsl/manual/html_node/Accessing-vector-elements.html">here</a> - my understanding is that the functions whose names end in <code>get</code> return a subset of an existing matrix or vector. For instance, the line from above:</p>
+<pre class="cpp"><code>dl=gsl_vector_get(D_l, i);</code></pre>
+<p>assigns to <code>dl</code> the <span class="math inline">\(i^{th}\)</span> element of the vector <code>D_l</code>.</p>
 
     </div>
   </article>
@@ -110,7 +155,30 @@
     </div>
     
 
+
+
+<script src="//cdn.bootcss.com/highlight.js/9.11.0/highlight.min.js"></script>
+
+
+
+<script src="//cdn.bootcss.com/highlight.js/9.11.0/languages/r.min.js"></script>
+<script src="//cdn.bootcss.com/highlight.js/9.11.0/languages/yaml.min.js"></script>
+<script>hljs.configure({languages: []}); hljs.initHighlightingOnLoad();</script>
+
+
+
     
+<script src="../../../../js/math-code.js"></script>
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+  tex2jax: {
+    inlineMath: [['$','$'], ['\\(','\\)']],
+    processEscapes: true
+  }
+});
+</script>
+<script async src="//cdn.bootcss.com/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML"></script>
+
 
     
 <script>

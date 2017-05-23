@@ -14,5 +14,56 @@ tags:
   - R
 ---
 
-My goal is to  translate the C++ code in [`GEMMA/src/mvlmm.cpp`](https://github.com/xiangzhou/GEMMA/blob/master/src/mvlmm.cpp) to mathematical notation and, ultimately, to R code.
+My goal is to  translate the C++ code in [`GEMMA/src/mvlmm.cpp`](https://github.com/xiangzhou/GEMMA/blob/master/src/mvlmm.cpp) to mathematical notation and, ultimately, to R code. Zhou's C++ code uses the gsl C++ library. 
+
+Let's examine the function `CalcXHiY` which runs from line [357-384](https://github.com/xiangzhou/GEMMA/blob/793ba025de8e71b49e738613e8dd9bbdd06389d4/src/mvlmm.cpp#L357-L384) of `mvlmm.cpp`. I reproduce them here:
+
+```{Rcpp, eval = FALSE}
+void CalcXHiY(const gsl_vector *eval, const gsl_vector *D_l, const gsl_matrix *X, const gsl_matrix *UltVehiY, gsl_vector *xHiy)
+{
+	size_t n_size=eval->size, c_size=X->size1, d_size=D_l->size;
+
+	gsl_vector_set_zero (xHiy);
+
+	double x, delta, dl, y, d;
+	for (size_t i=0; i<d_size; i++) {
+		dl=gsl_vector_get(D_l, i);
+		for (size_t j=0; j<c_size; j++) {
+			d=0.0;
+			for (size_t k=0; k<n_size; k++) {
+				x=gsl_matrix_get(X, j, k);
+				y=gsl_matrix_get(UltVehiY, i, k);
+				delta=gsl_vector_get(eval, k);
+				d+=x*y/(delta*dl+1.0);
+			}
+			gsl_vector_set(xHiy, j*d_size+i, d);
+		}
+	}
+	/*
+	cout<<"xHiy: "<<endl;
+	for (size_t i=0; i<(d_size*c_size); i++) {
+		cout<<gsl_vector_get(xHiy, i)<<endl;
+	}
+	 */
+	return;
+}
+
+```
+
+We see that Zhou uses four gsl functions repeatedly:
+
+1. `gsl_matrix_get`
+2. `gsl_matrix_set`
+3. `gsl_vector_set`
+4. `gsl_vector_get`
+
+From reading the documentation for these four functions - [here](https://www.gnu.org/software/gsl/manual/html_node/Accessing-matrix-elements.html) and [here](https://www.gnu.org/software/gsl/manual/html_node/Accessing-vector-elements.html) - my understanding is that the functions whose names end in `get` return a subset of an existing matrix or vector. For instance, the line from above:
+
+```{Rcpp, eval = FALSE}
+dl=gsl_vector_get(D_l, i);
+```
+
+assigns to `dl` the $i^{th}$ element of the vector `D_l`.
+
+
 
