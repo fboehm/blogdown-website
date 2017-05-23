@@ -1,0 +1,16 @@
+---
+title: Deciphering GEMMA’s C++ Code
+author: Frederick Boehm
+date: '2017-05-23'
+slug: deciphering-gemma-s-c-code
+draft: 'true'
+categories:
+  - Computing
+tags:
+  - Genetics
+  - EM algorithm
+  - Linear mixed effects models
+  - Variance components
+  - R
+---
+

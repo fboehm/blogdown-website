@@ -21,12 +21,6 @@ ignoreFiles = ["\\.Rmd$", "_files$", "_cache$"]
     name = "Curriculum Vitae"
     url = "/cv/"
 
-[social]
-  # Link your social networking accounts to the side menu
-  # by entering your username or ID.
-
-  # SNS microblogging
-  twitter = "FredBoehm128"
 
 [params]
     description = "Frederick Boehm's Website."

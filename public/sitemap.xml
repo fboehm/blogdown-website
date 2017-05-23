@@ -2,6 +2,11 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
+    <loc>/2017/05/23/deciphering-gemma-s-c-code/</loc>
+    <lastmod>2017-05-23T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
     <loc>/cv/</loc>
     <lastmod>2017-05-21T00:00:00+00:00</lastmod>
   </url>
@@ -33,38 +38,44 @@
   </url>
   
   <url>
+    <loc>/categories/computing/</loc>
+    <lastmod>2017-05-23T00:00:00+00:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
     <loc>/tags/em-algorithm/</loc>
-    <lastmod>2017-05-16T00:00:00+00:00</lastmod>
+    <lastmod>2017-05-23T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
   <url>
     <loc>/</loc>
-    <lastmod>2017-05-21T00:00:00+00:00</lastmod>
+    <lastmod>2017-05-23T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
   <url>
     <loc>/tags/genetics/</loc>
-    <lastmod>2017-05-16T00:00:00+00:00</lastmod>
+    <lastmod>2017-05-23T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
   <url>
     <loc>/tags/linear-mixed-effects-models/</loc>
-    <lastmod>2017-05-16T00:00:00+00:00</lastmod>
+    <lastmod>2017-05-23T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
   <url>
     <loc>/post/</loc>
-    <lastmod>2017-05-16T00:00:00+00:00</lastmod>
+    <lastmod>2017-05-23T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
   <url>
     <loc>/tags/r/</loc>
-    <lastmod>2017-05-16T00:00:00+00:00</lastmod>
+    <lastmod>2017-05-23T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
@@ -82,7 +93,7 @@
   
   <url>
     <loc>/tags/variance-components/</loc>
-    <lastmod>2017-05-16T00:00:00+00:00</lastmod>
+    <lastmod>2017-05-23T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
