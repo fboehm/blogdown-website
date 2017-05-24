@@ -3,6 +3,7 @@ title: A ‘page’ type for blogdown & hugo lithium theme
 author: Frederick Boehm
 date: '2017-05-23'
 slug: a-page-type-for-blogdown-hugo-lithium-theme
+type: post
 categories:
   - Computing
 tags:
