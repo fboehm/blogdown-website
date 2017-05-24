@@ -18,7 +18,7 @@ The Hugo [documentation on types](https://gohugo.io/content/types/) is quite goo
   {{ partial "disqus.html" .}}
 ```
 
-Following the Hugo documentation, I created a subdirectory `layouts/page'. I then copied the files `_default/single.html` and `_default/list.html` to the new directory. I then edited the file `layouts/page/single.html` by removing the line that I highlighted above, i.e. the line with "disqus.html". 
+Following the Hugo documentation, I created a subdirectory `layouts/page`. I then copied the files `_default/single.html` and `_default/list.html` to the new directory. I then edited the file `layouts/page/single.html` by removing the line that I highlighted above, i.e. the line with "disqus.html". 
 
 I then created a `content/page` subdirectory and moved the Rmd files - that is, those Rmd files for my pages - to `content/page/about.Rmd`, for example.
 
