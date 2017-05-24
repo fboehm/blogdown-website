@@ -1,7 +1,7 @@
 ---
 title: Deciphering GEMMA’s C++ Code
 author: Frederick Boehm
-date: '2017-05-23'
+date: '`r lubridate::now()`'
 slug: deciphering-gemma-s-c-code
 draft: 'true'
 categories:
@@ -15,6 +15,9 @@ tags:
 ---
 
 My goal is to  translate the C++ code in [`GEMMA/src/mvlmm.cpp`](https://github.com/xiangzhou/GEMMA/blob/master/src/mvlmm.cpp) to mathematical notation and, ultimately, to R code. Zhou's C++ code uses the gsl C++ library. 
+
+
+## `CalcXHiY` C++ code
 
 Let's examine the function `CalcXHiY` which runs from line [357-384](https://github.com/xiangzhou/GEMMA/blob/793ba025de8e71b49e738613e8dd9bbdd06389d4/src/mvlmm.cpp#L357-L384) of `mvlmm.cpp`. I reproduce them here:
 
@@ -112,7 +115,7 @@ Note that each time we restart the loop over `k` we reset the value of `d` to ze
 
 The use of `1.0` rather than merely `1` seems peculiar to me - I'm new to C++. I imagine that `1` and `1.0` might be stored differently, which might justify the use of `1.0` over `1`. 
 
-Since we're looping over `k`, it's as if we're taking the inner (dot) product of two vectors and defining it to be the number `d`. 
+Since we're looping over `k`, it's as if we're taking the inner (dot) product of two vectors and defining it to be the number `d` (after the looping over k).
 
 
 
