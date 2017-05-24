@@ -13,10 +13,10 @@
     
     <item>
       <title>Curriculum Vitae</title>
-      <link>/cv/</link>
+      <link>/curriculum-vitae/</link>
       <pubDate>Tue, 23 May 2017 16:28:03 -0500</pubDate>
       
-      <guid>/cv/</guid>
+      <guid>/curriculum-vitae/</guid>
       <description></description>
     </item>
     
@@ -26,24 +26,6 @@
       <pubDate>Tue, 23 May 2017 16:26:03 -0500</pubDate>
       
       <guid>/research/</guid>
-      <description></description>
-    </item>
-    
-    <item>
-      <title>Research</title>
-      <link>/research.knit/</link>
-      <pubDate>Tue, 23 May 2017 16:26:03 -0500</pubDate>
-      
-      <guid>/research.knit/</guid>
-      <description></description>
-    </item>
-    
-    <item>
-      <title>Research</title>
-      <link>/research.utf8/</link>
-      <pubDate>Tue, 23 May 2017 16:26:03 -0500</pubDate>
-      
-      <guid>/research.utf8/</guid>
       <description></description>
     </item>
     
