@@ -24,6 +24,6 @@ I then created a `content/page` subdirectory and moved the Rmd files - that is, 
 
 I initially changed the `config.toml` menu items that link to my pages. I assumed, mistakenly, that the pages would be in `public/page/` directory, when, in fact they are in `public/`, for example, `public/about/`. Recognizing this, I undid my changes to `config.toml`. The site now seems to work as I desired - the pages have no Disqus section. 
 
-
+I forgot to say that I also copied the file `archetypes/default.md` to `archetypes/page.md`.
 
 

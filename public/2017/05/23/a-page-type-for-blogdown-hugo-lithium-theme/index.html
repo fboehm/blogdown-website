@@ -75,6 +75,7 @@
 <p>Following the Hugo documentation, I created a subdirectory <code>layouts/page'. I then copied the files</code>_default/single.html<code>and</code>_default/list.html<code>to the new directory. I then edited the file</code>layouts/page/single.html` by removing the line that I highlighted above, i.e. the line with “disqus.html”.</p>
 <p>I then created a <code>content/page</code> subdirectory and moved the Rmd files - that is, those Rmd files for my pages - to <code>content/page/about.Rmd</code>, for example.</p>
 <p>I initially changed the <code>config.toml</code> menu items that link to my pages. I assumed, mistakenly, that the pages would be in <code>public/page/</code> directory, when, in fact they are in <code>public/</code>, for example, <code>public/about/</code>. Recognizing this, I undid my changes to <code>config.toml</code>. The site now seems to work as I desired - the pages have no Disqus section.</p>
+<p>I forgot to say that I also copied the file <code>archetypes/default.md</code> to <code>archetypes/page.md</code>.</p>
 
     </div>
   </article>
