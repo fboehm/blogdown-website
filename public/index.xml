@@ -30,6 +30,16 @@
     </item>
     
     <item>
+      <title>A ‘page’ type for blogdown &amp; hugo lithium theme</title>
+      <link>/2017/05/23/a-page-type-for-blogdown-hugo-lithium-theme/</link>
+      <pubDate>Tue, 23 May 2017 00:00:00 +0000</pubDate>
+      
+      <guid>/2017/05/23/a-page-type-for-blogdown-hugo-lithium-theme/</guid>
+      <description>I didn’t like the fact that my ‘About’ and ‘Research’ pages included a Disqus section, as I don’t need comments on these materials. I decided to find a way to create pages - which are not blog posts - that don’t have the Disqus section. I’m using, as of right now, Yihui Xie’s hugo lithium theme, with a few small modifications that I’ve documented in my first blog post.
+The Hugo documentation on types is quite good.</description>
+    </item>
+    
+    <item>
       <title>Deciphering GEMMA’s C&#43;&#43; Code</title>
       <link>/2017/05/23/deciphering-gemma-s-c-code/</link>
       <pubDate>Tue, 23 May 2017 00:00:00 +0000</pubDate>
