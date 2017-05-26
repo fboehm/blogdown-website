@@ -117,6 +117,27 @@ The use of `1.0` rather than merely `1` seems peculiar to me - I'm new to C++. I
 
 Since we're looping over `k`, it's as if we're taking the inner (dot) product of two vectors and defining it to be the number `d` (after the looping over k).
 
+## EigenProc
+
+I want to understand the function `EigenProc`, which occupies [lines 215-307](https://github.com/xiangzhou/GEMMA/blob/0885df136fcbe42b1665998f293953cfe8d216c6/src/mvlmm.cpp#L215-L307) of `mvlmm.cpp`.
+
+The first several lines allocate matrices with dimension `d_size` by `d_size`.
+
+The function `gsl_matrix_memcpy` is used on line 228 to copy the contents of matrix `V_e` to matrix `V_e_temp`, according to the [documentation](https://www.gnu.org/software/gsl/manual/html_node/Copying-matrices.html). Note that `V_e` is an input to the function, while `V_e_temp` is defined as a `d_size` by `d_size` matrix in line 222. 
+
+Looking at the first line of the function, it seems peculiar to me that some of the `gsl_matrix` terms are preceded by `const`. What does this mean? [This documentation](https://www.gnu.org/software/gsl/manual/html_node/Matrix-views.html) may answer my question.
+
+By searching the repository, I see that the function `EigenDecomp` is in lapack.h. But I'm struggling to find documentation for the actual function. It looks like LAPACK is written in Fortran90, according to [Wikipedia](https://en.wikipedia.org/wiki/LAPACK).
+
+I now see that the file lapack.cpp contains the code for the function `EigenDecomp`. See the full code [here](https://github.com/xiangzhou/GEMMA/blob/0885df136fcbe42b1665998f293953cfe8d216c6/src/lapack.cpp#L296-L379). It's interesting that there are two functions with the same name. They differ in use of 'float' objects. For the `EigenDecomp` without floats, we see that, when using LAPACK, the function `lapack_eigen_decomp` is used. `lapack_eigen_decomp` is defined starting at line 234 of lapack.cpp. Zhou's comment tells us that the first input is 'destroyed', i.e., over-written, when the function runs.
+
+
+
+
+
+
+
+
 
 
 
