@@ -19,7 +19,7 @@ ignoreFiles = ["\\.Rmd$", "_files$", "_cache$"]
     url = "/research/"
 [[menu.main]]
     name = "Curriculum Vitae"
-    url = "/cv/"
+    url = "/curriculum-vitae/"
 
 
 [params]
