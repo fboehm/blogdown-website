@@ -59,7 +59,7 @@
 
   <article class="article">
     
-    <span class="article-duration">4 min read</span>
+    <span class="article-duration">5 min read</span>
     
 
     <h1 class="article-title">Deciphering GEMMA’s C&#43;&#43; Code</h1>
@@ -144,6 +144,13 @@
 <h2><code>CalcQi</code></h2>
 <p>Zhou’s <a href="https://github.com/xiangzhou/GEMMA/blob/338bf7b7db8805515597d9e2d4b5dcbe2e40dfd1/src/mvlmm.cpp#L309">comment</a> tells us that</p>
 <p><span class="math display">\[Qi=(\sum_{k=1}^n x_kx_k^T\otimes(delta_k*Dl+I)^{-1} )^{-1}\]</span></p>
+<p>In examining the code for <code>CalcQi</code>, we see that he first calculates the entries for the matrix <code>Q</code>. Part of the code is <a href="https://github.com/xiangzhou/GEMMA/blob/338bf7b7db8805515597d9e2d4b5dcbe2e40dfd1/src/mvlmm.cpp#L328-L333">here</a>. He also uses the symmetry of <code>Q</code> to do only the needed calculations. The number <code>d</code> that gets entered into <code>Q</code> is related to the inner product of two rows of the <code>X</code> matrix, except that each term in the sum (ie, inner product) has a distinct weight; namely, <span class="math inline">\(Dl * \delta_k+ 1\)</span>, where <span class="math inline">\(\delta_k\)</span> differs for each component of the inner product.</p>
+<p>After calculating all entries for matrix <code>Q</code>, he calls three distinct functions in the code <a href="https://github.com/xiangzhou/GEMMA/blob/338bf7b7db8805515597d9e2d4b5dcbe2e40dfd1/src/mvlmm.cpp#L345-L348">here</a>.</p>
+<p><code>LUDecomp</code> is defined in <a href="https://github.com/xiangzhou/GEMMA/blob/03d7d2556a9284dc0ac3e155b5c9a8d69b1b21ee/src/lapack.cpp#L464-L468">lapack.cpp</a>.</p>
+<p>We see that it calls the function <code>gsl_linalg_LU_decomp</code>, which is <a href="https://www.gnu.org/software/gsl/manual/html_node/LU-Decomposition.html">part of the GSL library</a>. It takes 3 arguments: a matrix, a permutation (matrix), and an integer. Note the structure of the output:</p>
+<blockquote>
+<p>These functions factorize the square matrix A into the LU decomposition PA = LU. On output the diagonal and upper triangular part of the input matrix A contain the matrix U. The lower triangular part of the input matrix (excluding the diagonal) contains L. The diagonal elements of L are unity, and are not stored.</p>
+</blockquote>
 </div>
 
     </div>
