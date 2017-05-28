@@ -148,7 +148,7 @@ We see that it calls the function `gsl_linalg_LU_decomp`, which is [part of the 
 
 > These functions factorize the square matrix A into the LU decomposition PA = LU. On output the diagonal and upper triangular part of the input matrix A contain the matrix U. The lower triangular part of the input matrix (excluding the diagonal) contains L. The diagonal elements of L are unity, and are not stored.
 
-
+The [LU Decomposition wikipedia page](https://en.wikipedia.org/wiki/LU_decomposition) is helpful.
 
 
 
