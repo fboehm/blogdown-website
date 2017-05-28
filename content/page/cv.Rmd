@@ -1,7 +1,18 @@
 ---
-date: 2017-05-23T16:28:03-05:00
+date: "`r lubridate::now()`"
 title: Curriculum Vitae
 ---
+
+## PERSONAL INFORMATION
+
+Name: Frederick Joseph Boehm, III    
+Citizenship: U.S.A.    
+Address: 1220 Medical Sciences Center    
+         1300 University Avenue    
+         Madison, WI 53715    
+         U.S.A.    
+Email Address: <frederick.boehm@gmail.com>
+
 
 ## EDUCATION
 
@@ -38,6 +49,35 @@ Wisconsin Academic Excellence Scholarship, University of Wisconsin-Madison, 1996
 
 
 ## TEACHING EXPERIENCE
+
+### Formal Courses    
+
+The College Classroom: How to teach inclusively for educating a diverse nation   
+Co-facilitator, Spring 2017, University of Wisconsin-Madison
+Introductory statistics for biologists    
+Lecturer student assistant (Instructor of record), Fall 2016, University of Wisconsin-Madison    
+Data science    
+Guest lecturer on topic models, Fall 2016, University of Wisconsin-Madison    
+Data science    
+Teaching assistant, Fall 2016, University of Wisconsin-Madison    
+Introductory statistics for engineers    
+Lecturer student assistant (Instructor of record), Spring 2014, Fall 2014, Spring 2015, Fall 2015, Spring 2016, University of Wisconsin-Madison    
+Introductory statistics    
+Lecturer student assistant (Instructor of record), Summer 2015, University of Wisconsin-Madison    
+Introduction to biostatistics    
+Teaching assistant, Fall 2009, Winter 2010, University of Washington
+Biostatistics 511    
+Teaching assistant, Summer 2008, University of Washington    
+Introductory organic chemistry
+Graduate student instructor, Fall 2001, University of California-Berkeley
+
+### Short Courses & Workshops
+
+
+
+
+## PUBLISHED WORKS
+
 
 
 

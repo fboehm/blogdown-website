@@ -6,17 +6,17 @@
     <description>Recent content on Frederick Boehm&#39;s Website</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Thu, 25 May 2017 20:10:43 +0000</lastBuildDate>
+    <lastBuildDate>Sun, 28 May 2017 10:11:48 +0000</lastBuildDate>
     
 	<atom:link href="/index.xml" rel="self" type="application/rss+xml" />
     
     
     <item>
       <title>Deciphering GEMMA’s C&#43;&#43; Code</title>
-      <link>/2017/05/25/deciphering-gemma-s-c-code/</link>
-      <pubDate>Thu, 25 May 2017 20:10:43 +0000</pubDate>
+      <link>/2017/05/28/deciphering-gemma-s-c-code/</link>
+      <pubDate>Sun, 28 May 2017 10:11:48 +0000</pubDate>
       
-      <guid>/2017/05/25/deciphering-gemma-s-c-code/</guid>
+      <guid>/2017/05/28/deciphering-gemma-s-c-code/</guid>
       <description>My goal is to translate the C++ code in GEMMA/src/mvlmm.cpp to mathematical notation and, ultimately, to R code. Zhou’s C++ code uses the gsl C++ library.
 CalcXHiY C++ code Let’s examine the function CalcXHiY which runs from line 357-384 of mvlmm.cpp. I reproduce them here:
 void CalcXHiY(const gsl_vector *eval, const gsl_vector *D_l, const gsl_matrix *X, const gsl_matrix *UltVehiY, gsl_vector *xHiy) { size_t n_size=eval-&amp;gt;size, c_size=X-&amp;gt;size1, d_size=D_l-&amp;gt;size; gsl_vector_set_zero (xHiy); double x, delta, dl, y, d; for (size_t i=0; i&amp;lt;d_size; i++) { dl=gsl_vector_get(D_l, i); for (size_t j=0; j&amp;lt;c_size; j++) { d=0.</description>
@@ -25,17 +25,21 @@ void CalcXHiY(const gsl_vector *eval, const gsl_vector *D_l, const gsl_matrix *X
     <item>
       <title>Curriculum Vitae</title>
       <link>/curriculum-vitae/</link>
-      <pubDate>Tue, 23 May 2017 16:28:03 -0500</pubDate>
+      <pubDate>Sat, 27 May 2017 15:28:41 +0000</pubDate>
       
       <guid>/curriculum-vitae/</guid>
-      <description>EDUCATION Ph.D. in Statistics, University of Wisconsin-Madison, 2018 (anticipated)
+      <description>PERSONAL INFORMATION Name: Frederick Joseph Boehm, III
+Citizenship: U.S.A.
+Address: 1220 Medical Sciences Center
+1300 University Avenue
+Madison, WI 53715
+U.S.A.
+Email Address: frederick.boehm@gmail.com
+ EDUCATION Ph.D. in Statistics, University of Wisconsin-Madison, 2018 (anticipated)
 M.D., University of Wisconsin-Madison, 2007
 M.S. in Population Health Sciences, University of Wisconsin-Madison, 2007
 B.S. in Chemistry, Mathematics, and Biochemistry, University of Wisconsin-Madison, 2001
- EMPLOYMENT University of Wisconsin-Madison Molecular and Environmental Toxicology Center, Postdoctoral Trainee, 2012-2014
-University of Wisconsin-Madison Value-Added Research Center, Assistant Researcher, 2011
-University of Washington Department of Biostatistics, Senior Fellow, 2007-2009
- AWARDS &amp;amp; HONORS IRES Research Ethics Fellowship, University of Wisconsin-Madison, 2013-2014</description>
+ EMPLOYMENT University of Wisconsin-Madison Molecular and Environmental Toxicology Center, Postdoctoral Trainee, 2012-2014</description>
     </item>
     
     <item>

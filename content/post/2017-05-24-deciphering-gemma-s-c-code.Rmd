@@ -117,7 +117,7 @@ The use of `1.0` rather than merely `1` seems peculiar to me - I'm new to C++. I
 
 Since we're looping over `k`, it's as if we're taking the inner (dot) product of two vectors and defining it to be the number `d` (after the looping over k).
 
-## EigenProc
+## `EigenProc`
 
 I want to understand the function `EigenProc`, which occupies [lines 215-307](https://github.com/xiangzhou/GEMMA/blob/0885df136fcbe42b1665998f293953cfe8d216c6/src/mvlmm.cpp#L215-L307) of `mvlmm.cpp`.
 
@@ -130,6 +130,33 @@ Looking at the first line of the function, it seems peculiar to me that some of 
 By searching the repository, I see that the function `EigenDecomp` is in lapack.h. But I'm struggling to find documentation for the actual function. It looks like LAPACK is written in Fortran90, according to [Wikipedia](https://en.wikipedia.org/wiki/LAPACK).
 
 I now see that the file lapack.cpp contains the code for the function `EigenDecomp`. See the full code [here](https://github.com/xiangzhou/GEMMA/blob/0885df136fcbe42b1665998f293953cfe8d216c6/src/lapack.cpp#L296-L379). It's interesting that there are two functions with the same name. They differ in use of 'float' objects. For the `EigenDecomp` without floats, we see that, when using LAPACK, the function `lapack_eigen_decomp` is used. `lapack_eigen_decomp` is defined starting at line 234 of lapack.cpp. Zhou's comment tells us that the first input is 'destroyed', i.e., over-written, when the function runs.
+
+
+## `CalcQi`
+
+Zhou's [comment](https://github.com/xiangzhou/GEMMA/blob/338bf7b7db8805515597d9e2d4b5dcbe2e40dfd1/src/mvlmm.cpp#L309) tells us that 
+
+$$Qi=(\sum_{k=1}^n x_kx_k^T\otimes(delta_k*Dl+I)^{-1} )^{-1}$$
+
+In examining the code for `CalcQi`, we see that he first calculates the entries for the matrix `Q`. Part of the code is [here](https://github.com/xiangzhou/GEMMA/blob/338bf7b7db8805515597d9e2d4b5dcbe2e40dfd1/src/mvlmm.cpp#L328-L333). He also uses the symmetry of `Q` to do only the needed calculations. The number `d` that gets entered into `Q` is related to the inner product of two rows of the `X` matrix, except that each term in the sum (ie, inner product) has a distinct weight; namely, $Dl * \delta_k+ 1$, where $\delta_k$ differs for each component of the inner product.
+
+After calculating all entries for matrix `Q`, he calls three distinct functions in the code [here](https://github.com/xiangzhou/GEMMA/blob/338bf7b7db8805515597d9e2d4b5dcbe2e40dfd1/src/mvlmm.cpp#L345-L348).
+
+`LUDecomp` is defined in [lapack.cpp](https://github.com/xiangzhou/GEMMA/blob/03d7d2556a9284dc0ac3e155b5c9a8d69b1b21ee/src/lapack.cpp#L464-L468). 
+
+We see that it calls the function `gsl_linalg_LU_decomp`, which is [part of the GSL library](https://www.gnu.org/software/gsl/manual/html_node/LU-Decomposition.html). It takes 3 arguments: a matrix, a permutation (matrix), and an integer. Note the structure of the output:
+
+> These functions factorize the square matrix A into the LU decomposition PA = LU. On output the diagonal and upper triangular part of the input matrix A contain the matrix U. The lower triangular part of the input matrix (excluding the diagonal) contains L. The diagonal elements of L are unity, and are not stored.
+
+
+
+
+
+
+
+
+
+
 
 
 
