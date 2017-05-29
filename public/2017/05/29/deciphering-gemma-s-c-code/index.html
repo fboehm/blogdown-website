@@ -59,13 +59,13 @@
 
   <article class="article">
     
-    <span class="article-duration">6 min read</span>
+    <span class="article-duration">12 min read</span>
     
 
     <h1 class="article-title">Deciphering GEMMA’s C&#43;&#43; Code</h1>
 
     
-    <span class="article-date">2017/05/28</span>
+    <span class="article-date">2017/05/29</span>
     
 
     <div class="article-content">
@@ -171,6 +171,173 @@
 <h2><code>UpdateU</code></h2>
 <p><a href="https://github.com/xiangzhou/GEMMA/blob/338bf7b7db8805515597d9e2d4b5dcbe2e40dfd1/src/mvlmm.cpp#L411-L418"><code>UpdateU</code></a> is defined in <code>mvlmm.cpp</code>.</p>
 <p><code>gsl_matrix_sub</code> is a matrix subtraction, in which the second argument is subtracted from the first argument and stored as the first argument. See the documentation <a href="https://www.gnu.org/software/gsl/manual/html_node/Matrix-operations.html">here</a></p>
+<p>The last line of <code>UpdateU</code> contains a call to <a href="https://github.com/xiangzhou/GEMMA/blob/338bf7b7db8805515597d9e2d4b5dcbe2e40dfd1/src/mvlmm.cpp#L416"><code>gsl_matrix_mul_elements</code></a>, which is element-wise multiplication of matrices:</p>
+<blockquote>
+<p>This function multiplies the elements of matrix a by the elements of matrix b. The result a(i,j) a(i,j) * b(i,j) is stored in a and b remains unchanged. The two matrices must have the same dimensions.</p>
+</blockquote>
+</div>
+<div id="updatee" class="section level2">
+<h2><code>UpdateE</code></h2>
+<p><code>UpdateE</code> is the <a href="https://github.com/xiangzhou/GEMMA/blob/338bf7b7db8805515597d9e2d4b5dcbe2e40dfd1/src/mvlmm.cpp#L421-L428">next function defined in mvlmm.cpp</a>.</p>
+<p>First, note that <code>gsl_matrix_memcpy</code> copies the second argument’s elements to the first input’s elements. So, <code>gsl_matrix_memcpy(A, B)</code> assigns A to be a copy of B. Note that Zhou uses this function when he knows that subsequent steps will overwrite the matrix B, but B needs to be preserved.</p>
+</div>
+<div id="updatel_b" class="section level2">
+<h2><code>UpdateL_B</code></h2>
+<p><code>UpdateL_B</code> is a <a href="https://github.com/xiangzhou/GEMMA/blob/338bf7b7db8805515597d9e2d4b5dcbe2e40dfd1/src/mvlmm.cpp#L432-L447">slightly longer function than the previous update functions.</a></p>
+<p>I copy its code here:</p>
+<pre class="rcpp"><code>void UpdateL_B (const gsl_matrix *X, const gsl_matrix *XXti, const gsl_matrix *UltVehiY, const gsl_matrix *UltVehiU, gsl_matrix *UltVehiBX, gsl_matrix *UltVehiB)
+{
+    size_t c_size=X-&gt;size1, d_size=UltVehiY-&gt;size1;
+
+    gsl_matrix *YUX=gsl_matrix_alloc (d_size, c_size);
+
+    gsl_matrix_memcpy (UltVehiBX, UltVehiY);
+    gsl_matrix_sub (UltVehiBX, UltVehiU);
+
+    gsl_blas_dgemm(CblasNoTrans, CblasTrans, 1.0, UltVehiBX, X, 0.0, YUX);
+    gsl_blas_dgemm(CblasNoTrans, CblasNoTrans, 1.0, YUX, XXti, 0.0, UltVehiB);
+
+    gsl_matrix_free(YUX);
+
+    return;
+}</code></pre>
+<p>We see that the code allocates a matrix, <code>YUX</code>, with dimensions <code>d_size</code> by <code>c_size</code>. It then copies input <code>UltVehiY</code> to matrix <code>UltVehiBX</code> before overwriting <code>UltVehiBX</code> by <code>UltVehiBX - UltVehiU</code>. Next are two calls to the function <code>gsl_blas_dgemm</code>. We need to think about what these calls do.</p>
+<p>The <a href="https://www.gnu.org/software/gsl/manual/html_node/Level-3-GSL-BLAS-Interface.html">documentation</a> tells us that <code>gsl_blas_dgemm</code> is one of a family of functions that computes a matrix multiplication.</p>
+<blockquote>
+<p>These functions compute the matrix-matrix product and sum C = op(A) op(B) + C where op(A) = A, A^T, A^H for TransA = CblasNoTrans, CblasTrans, CblasConjTrans and similarly for the parameter TransB.</p>
+</blockquote>
+<blockquote>
+<p>Function: int gsl_blas_dgemm (CBLAS_TRANSPOSE_t TransA, CBLAS_TRANSPOSE_t TransB, double alpha, const gsl_matrix * A, const gsl_matrix * B, double beta, gsl_matrix * C)</p>
+</blockquote>
+<p>Thus the line <code>gsl_blas_dgemm(CblasNoTrans, CblasTrans, 1.0, UltVehiBX, X, 0.0, YUX);</code> calculates the product <code>UltVehiBX * t(X)</code> where t(X) denotes the transpose of X and <code>*</code> denotes matrix multiplication, since the value of <code>beta</code> here is 0.0 (and <code>alpha</code> is 1.0). The result is stored as <code>YUX</code>.</p>
+<p>Finally, we calculate the matrix product <code>YUX * XXti</code> and stored it as <code>UltVehiB</code>.</p>
+</div>
+<div id="updaterl_b" class="section level2">
+<h2><code>UpdateRL_B</code></h2>
+<pre class="rcpp"><code>void UpdateRL_B (const gsl_vector *xHiy, const gsl_matrix *Qi, gsl_matrix *UltVehiB)
+{
+    size_t d_size=UltVehiB-&gt;size1, c_size=UltVehiB-&gt;size2, dc_size=Qi-&gt;size1;
+
+    gsl_vector *b=gsl_vector_alloc (dc_size);
+
+    //calculate b=Qiv
+    gsl_blas_dgemv(CblasNoTrans, 1.0, Qi, xHiy, 0.0, b);
+
+    //copy b to UltVehiB
+    for (size_t i=0; i&lt;c_size; i++) {
+        gsl_vector_view UltVehiB_col=gsl_matrix_column (UltVehiB, i);
+        gsl_vector_const_view b_subcol=gsl_vector_const_subvector (b, i*d_size, d_size);
+        gsl_vector_memcpy (&amp;UltVehiB_col.vector, &amp;b_subcol.vector);
+    }
+
+    gsl_vector_free(b);
+
+    return;
+}</code></pre>
+<p>The line <code>gsl_blas_dgemv(CblasNoTrans, 1.0, Qi, xHiy, 0.0, b);</code> uses the function <code>gsl_blas_dgemv</code>, which is documented <a href="https://www.gnu.org/software/gsl/manual/html_node/Level-2-GSL-BLAS-Interface.html">here</a>.</p>
+<blockquote>
+<p>Function: int gsl_blas_dgemv (CBLAS_TRANSPOSE_t TransA, double alpha, const gsl_matrix * A, const gsl_vector * x, double beta, gsl_vector * y)</p>
+</blockquote>
+<blockquote>
+<p>These functions compute the matrix-vector product and sum y = op(A) x + y, where op(A) = A, A^T, A^H for TransA = CblasNoTrans, CblasTrans, CblasConjTrans.</p>
+</blockquote>
+<p>The line of code thus means that we calculate <code>Qi * xHiy</code> and store the result as <code>b</code>. Note that both <code>Qi</code> and <code>xHiy</code> are inputs to this function.</p>
+<p>Let’s examine the code within the loop.</p>
+<p><code>gsl_matrix_column</code> is documented <a href="https://www.gnu.org/software/gsl/manual/html_node/Creating-row-and-column-views.html">here</a>.</p>
+<blockquote>
+<p>Function: gsl_vector_view gsl_matrix_column (gsl_matrix * m, size_t j)</p>
+</blockquote>
+<blockquote>
+<p>These functions return a vector view of the j-th column of the matrix m. The data pointer of the new vector is set to null if j is out of range.</p>
+</blockquote>
+<blockquote>
+<p>The function gsl_vector_const_column is equivalent to gsl_matrix_column but can be used for matrices which are declared const.</p>
+</blockquote>
+<p>We see that for each iteration of the loop, we choose a column from <code>UltVehiB</code>, ie, we choose the <span class="math inline">\(i^{th}\)</span> column, and assign it to the object <code>UltVehiB_col</code>.</p>
+<p>The function is documented <a href="https://www.gnu.org/software/gsl/manual/html_node/Vector-views.html">here</a>.</p>
+<blockquote>
+<p>Function: gsl_vector_const_view gsl_vector_const_subvector (const gsl_vector * v, size_t offset, size_t n)</p>
+</blockquote>
+<blockquote>
+<p>These functions return a vector view of a subvector of another vector v. The start of the new vector is offset by offset elements from the start of the original vector. The new vector has n elements. Mathematically, the i-th element of the new vector v’ is given by,</p>
+</blockquote>
+<blockquote>
+<p>v’(i) = v-&gt;data[(offset + i)*v-&gt;stride] where the index i runs from 0 to n-1.</p>
+</blockquote>
+<blockquote>
+<p>The data pointer of the returned vector struct is set to null if the combined parameters (offset,n) overrun the end of the original vector.</p>
+</blockquote>
+<blockquote>
+<p>The new vector is only a view of the block underlying the original vector, v. The block containing the elements of v is not owned by the new vector. When the view goes out of scope the original vector v and its block will continue to exist. The original memory can only be deallocated by freeing the original vector. Of course, the original vector should not be deallocated while the view is still in use.</p>
+</blockquote>
+<blockquote>
+<p>The function gsl_vector_const_subvector is equivalent to gsl_vector_subvector but can be used for vectors which are declared const.</p>
+</blockquote>
+<p>Together, the lines contained in the <code>for</code> loop serve to copy the elements of the vector <code>b</code> into the matrix <code>UltVehiB</code>, where each element of <code>b</code> is entered exactly once into <code>UltVehiB</code>.</p>
+</div>
+<div id="updatev" class="section level2">
+<h2><code>UpdateV</code></h2>
+<p>This function serves to update both <code>Ve</code> and <code>Vg</code>.</p>
+<pre class="rcpp"><code>void UpdateV (const gsl_vector *eval, const gsl_matrix *U, const gsl_matrix *E, const gsl_matrix *Sigma_uu, const gsl_matrix *Sigma_ee, gsl_matrix *V_g, gsl_matrix *V_e)
+{
+    size_t n_size=eval-&gt;size, d_size=U-&gt;size1;
+
+    gsl_matrix_set_zero (V_g);
+    gsl_matrix_set_zero (V_e);
+
+    double delta;
+
+    //calculate the first part: UD^{-1}U^T and EE^T
+    for (size_t k=0; k&lt;n_size; k++) {
+        delta=gsl_vector_get (eval, k);
+        if (delta==0) {continue;}
+
+        gsl_vector_const_view U_col=gsl_matrix_const_column (U, k);
+        gsl_blas_dsyr (CblasUpper, 1.0/delta, &amp;U_col.vector, V_g);
+    }
+
+    gsl_blas_dsyrk(CblasUpper, CblasNoTrans, 1.0, E, 0.0, V_e);
+
+    //copy the upper part to lower part
+    for (size_t i=0; i&lt;d_size; i++) {
+        for (size_t j=0; j&lt;i; j++) {
+            gsl_matrix_set (V_g, i, j, gsl_matrix_get(V_g, j, i));
+            gsl_matrix_set (V_e, i, j, gsl_matrix_get(V_e, j, i));
+        }
+    }
+
+    //add Sigma
+    gsl_matrix_add (V_g, Sigma_uu);
+    gsl_matrix_add (V_e, Sigma_ee);
+
+    //scale by 1/n
+    gsl_matrix_scale (V_g, 1.0/(double)n_size);
+    gsl_matrix_scale (V_e, 1.0/(double)n_size);
+
+    return;
+}</code></pre>
+<p>We first set to matrices of zeros the objects <code>Vg</code> and <code>Ve</code>.</p>
+<p>The function <code>gsl_blas_dsyr</code> is used in the <code>for</code> loop over <code>k</code>. We need to look at its purpose.</p>
+<blockquote>
+<p>Function: int gsl_blas_dsyr (CBLAS_UPLO_t Uplo, double alpha, const gsl_vector * x, gsl_matrix * A) These functions compute the symmetric rank-1 update A = x x^T + A of the symmetric matrix A. Since the matrix A is symmetric only its upper half or lower half need to be stored. When Uplo is CblasUpper then the upper triangle and diagonal of A are used, and when Uplo is CblasLower then the lower triangle and diagonal of A are used.</p>
+</blockquote>
+<p>The line <code>gsl_blas_dsyr (CblasUpper, 1.0/delta, &amp;U_col.vector, V_g);</code> thus tells us to use the upper portion of the <code>V_g</code> matrix (and the diagonal) and to add to (the current value of) <code>V_g</code> the matrix formed by the (matrix multiplication) product of a column of U with its transpose, with each entry of Ucolumn t(Ucolumn) divided by delta. Note that <code>delta</code> is the <span class="math inline">\(k^{th}\)</span> eigenvalue, so it changes with it iteration of the <code>for</code> loop.</p>
+<p>After completing the <code>for</code> loop over <code>k</code>, we have the line with the function: <code>gsl_blas_dsyrk</code>. This function is documented <a href="https://www.gnu.org/software/gsl/manual/html_node/Level-3-GSL-BLAS-Interface.html">here</a>.</p>
+<blockquote>
+<p>Function: int gsl_blas_dsyrk (CBLAS_UPLO_t Uplo, CBLAS_TRANSPOSE_t Trans, double alpha, const gsl_matrix * A, double beta, gsl_matrix * C)</p>
+</blockquote>
+<blockquote>
+<p>These functions compute a rank-k update of the symmetric matrix C, C = A A^T + C when Trans is CblasNoTrans and C = A^T A + C when Trans is CblasTrans. Since the matrix C is symmetric only its upper half or lower half need to be stored. When Uplo is CblasUpper then the upper triangle and diagonal of C are used, and when Uplo is CblasLower then the lower triangle and diagonal of C are used.</p>
+</blockquote>
+<p>Thus, we interpret the line <code>gsl_blas_dsyrk(CblasUpper, CblasNoTrans, 1.0, E, 0.0, V_e);</code> to be calculating the matrix <span class="math inline">\(EE^T\)</span> and assigning it to the value <code>V_e</code>.</p>
+<p><code>gsl_matrix_add</code> is for addition of two matrices, where the first input is overwritten by the sum.</p>
+<blockquote>
+<p>Function: int gsl_matrix_add (gsl_matrix * a, const gsl_matrix * b) This function adds the elements of matrix b to the elements of matrix a. The result a(i,j) a(i,j) + b(i,j) is stored in a and b remains unchanged. The two matrices must have the same dimensions.</p>
+</blockquote>
+<p><code>gsl_matrix_scale</code> multiplies each element of a matrix by a scalar.</p>
+<p>Thus, the line</p>
+<p><code>gsl_matrix_scale (V_g, 1.0/(double)n_size);</code></p>
+<p>leads to each entry of <code>V_g</code> being divided by <code>n_size</code> (with the result stored as the new value of <code>V_g</code>).</p>
 </div>
 
     </div>
