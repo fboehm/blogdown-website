@@ -444,10 +444,42 @@ Note also the line: `EigenDecomp(Lambda, U_l, D_l, 0);`. It is line 259 in `Eige
 
 A single call to `EigenDecomp`, as in `EigenDecomp(Lambda, U_l, D_l, 0);`, yields eigenvectors stored as the matrix `U_l` and eigenvalues in the vector `D_l`. Note that the eigenvalues are not ordered, but they do match the eigenvectors, which are the columns of `U_l`.
 
-Recall that $\Lambda = V_e^{- \frac{1}{2}}V_g V_e^{- \frac{1}{2}}$, which, in Zhou's notation is $Lambda=V_ehi V_g V_ehi$
+Recall that $\Lambda = V_e^{- \frac{1}{2}}V_g V_e^{- \frac{1}{2}}$, which, in Zhou's notation is `Lambda=V_ehi V_g V_ehi`
 
 
+## The logic of `MphEM`
 
+We start with the line that contains the comment "start EM".
+
+For each value of `t`, ie, for each iteration through the `for` loop, we have the following steps:
+
+1. `EigenProc(V_g, V_e, D_l, UltVeh, UltVehi);`
+
+This takes inputs `V_g` and `V_e` and 'creates' `D_l`, `UltVeh`, and `UltVehi`. Plus, by assigning the output of EigenProc to `logdet_Ve`, Zhou stores the returned value. It's interesting to note that `U_l` is *not* a byproduct of this function. Subsequent functions don't use `U_l` directly; instead, they use `UltVeh` and `UltVehi`. 
+
+2. `CalcQi(eval, D_l, X, Qi);`
+
+Remember that, in Zhou's comment, `Qi=(\sum_{k=1}^n x_kx_k^T\otimes(delta_k*Dl+I)^{-1} )^{-1}`.
+
+This function takes as input `eval` - which, I think, is the eigenvalues vector *from* the eigendecomposition of the kinship matrix.
+
+Note that `Qi` is later needed in the call to `CalcSigma`.
+
+I also need to think about *scope* of variables in C++. [Here is a useful resource](https://en.wikibooks.org/wiki/C%2B%2B_Programming/Scope/Examples) 
+
+3. `CalcXHiY(eval, D_l, X, UltVehiY, xHiy);`
+
+Calculates the quantity `xHiy`, which will later be used for calculating `logl_new`
+
+4. `CalcOmega(eval, D_l, OmegaU, OmegaE)`
+
+Recall that, according to Zhou's notation:
+
+`//OmegaU=D_l/(delta Dl+I)^{-1}
+//OmegaE=delta D_l/(delta Dl+I)^{-1}`
+
+
+5. 
 
 
 
