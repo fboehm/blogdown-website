@@ -435,7 +435,16 @@ Note also that `U_l` is the matrix that contains the eigenvectors.
 
 In other words, `EigenDecomp` "creates" both `U_l` (matrix of eigenvectors for `V_e`) and `D_l` (vector of eigenvalues of `V_e`).
 
+Note also the line: `EigenDecomp(Lambda, U_l, D_l, 0);`. It is line 259 in `EigenProc` and is the latter of the two calls of `EigenDecomp` within the function `EigenDecomp`.
 
+
+
+
+## More on `EigenDecomp`
+
+A single call to `EigenDecomp`, as in `EigenDecomp(Lambda, U_l, D_l, 0);`, yields eigenvectors stored as the matrix `U_l` and eigenvalues in the vector `D_l`. Note that the eigenvalues are not ordered, but they do match the eigenvectors, which are the columns of `U_l`.
+
+Recall that $\Lambda = V_e^{- \frac{1}{2}}V_g V_e^{- \frac{1}{2}}$, which, in Zhou's notation is $Lambda=V_ehi V_g V_ehi$
 
 
 
