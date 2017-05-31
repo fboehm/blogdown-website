@@ -361,7 +361,79 @@ Thus, the line
 
 leads to each entry of `V_g` being divided by `n_size` (with the result stored as the new value of `V_g`).
 
+## `CalcSigma`
 
+Our next function to consider is [`CalcSigma`](https://github.com/xiangzhou/GEMMA/blob/5252c296a389f296e97d95e56f13b77351b32bec/src/mvlmm.cpp#L512-L579).
+
+First, `Sigma_uu` and `Sigma_ee` are set to be matrices with all zeros.
+
+`gsl_matrix_diagonal` is used to get the diagonal entries of the matrices.
+
+> Function: gsl_vector_view gsl_matrix_diagonal (gsl_matrix * m)
+Function: gsl_vector_const_view gsl_matrix_const_diagonal (const gsl_matrix * m)
+These functions return a vector view of the diagonal of the matrix m. The matrix m is not required to be square. For a rectangular matrix the length of the diagonal is the same as the smaller dimension of the matrix.
+
+> The function gsl_matrix_const_diagonal is equivalent to gsl_matrix_diagonal but can be used for matrices which are declared const.
+
+`Suu_diag.vector`, after the `for` loop over `k`, ends up containing the sum of the diagonal of `Sigma_uu` and the sum of the columns of `OmegaU`.
+
+For now, I'll skip the [section of code that's labeled "calculate the second term for reml"](https://github.com/xiangzhou/GEMMA/blob/5252c296a389f296e97d95e56f13b77351b32bec/src/mvlmm.cpp#L536-L567).
+
+
+We then have [four matrix multiplication operations](https://github.com/xiangzhou/GEMMA/blob/5252c296a389f296e97d95e56f13b77351b32bec/src/mvlmm.cpp#L572-L575) to complete the function definition.
+
+## `MphEM`
+
+The first line is:
+
+```{rcpp, eval = FALSE}
+double MphEM (const char func_name, const size_t max_iter, const double max_prec, const gsl_vector *eval, const gsl_matrix *X, const gsl_matrix *Y, gsl_matrix *U_hat, gsl_matrix *E_hat, gsl_matrix *OmegaU, gsl_matrix *OmegaE, gsl_matrix *UltVehiY, gsl_matrix *UltVehiBX, gsl_matrix *UltVehiU, gsl_matrix *UltVehiE, gsl_matrix *V_g, gsl_matrix *V_e, gsl_matrix *B)
+```
+
+
+
+
+The [function `MphEM`](https://github.com/xiangzhou/GEMMA/blob/5252c296a389f296e97d95e56f13b77351b32bec/src/mvlmm.cpp#L621-L743) contains [a comment "start EM"](https://github.com/xiangzhou/GEMMA/blob/5252c296a389f296e97d95e56f13b77351b32bec/src/mvlmm.cpp#L661). 
+
+The [first calculations](https://github.com/xiangzhou/GEMMA/blob/5252c296a389f296e97d95e56f13b77351b32bec/src/mvlmm.cpp#L644) use the function `gsl_blas_dsyrk`. As we explained above, this function 
+
+Thus, the line 
+
+```{rcpp, eval = FALSE}
+gsl_blas_dsyrk (CblasUpper, CblasNoTrans, 1.0, X, 0.0, XXt);
+```
+
+Since beta is 0.0, we are actually calculating 
+
+$$XXt = 1.0 X X^T$$, i.e., we are defining `XXt` to be the matrix product formed by `X` multiplied by its transpose.
+
+The [`for` loop over `i`](https://github.com/xiangzhou/GEMMA/blob/5252c296a389f296e97d95e56f13b77351b32bec/src/mvlmm.cpp#L645-L649) merely completes the (symmetric) matrix `XXt`. Note that this step is needed because the matrix multiplication in `gsl_blas_dsyrk` stores only the upper triangle of matrix `XXt`. For computing the inverse, we'll want the full matrix `XXt`. 
+
+The [next two lines](https://github.com/xiangzhou/GEMMA/blob/5252c296a389f296e97d95e56f13b77351b32bec/src/mvlmm.cpp#L651-L652) compute the LU Decomposition of `XXt` and its inverse. The inverse is stored as `XXti`.
+
+The [subsequent lines](https://github.com/xiangzhou/GEMMA/blob/5252c296a389f296e97d95e56f13b77351b32bec/src/mvlmm.cpp#L655-L659) compute the value of `logl_const`, which differs for REML & ML.
+
+We then reach the comment "start EM" followed by a [`for` loop over `t`](https://github.com/xiangzhou/GEMMA/blob/5252c296a389f296e97d95e56f13b77351b32bec/src/mvlmm.cpp#L661-L728).
+
+
+## A bit of notation
+
+Let's suppose that Zhou's nomenclature appends a `t` to designate transpose and `i` to designate inverse. We see that he uses `V_eh` and `V_ehi`. For a long time, I wondered how he chose the names. I now think that `V_eh` is his notation for $V_e^{\frac{1}{2}}$ - that is, the `h` stands for "half" (as an exponent), while `V_ehi` is $V_e^{- \frac{1}{2}}$, namely, the inverse of `V_eh`.
+
+Similarly, `U_l` is $U_{\lambda}$ and `Ult` is $U_{\lambda}^T$, the transpose of `U_l`.
+
+
+## A note on `size`
+
+Look at [this line](https://github.com/xiangzhou/GEMMA/blob/5252c296a389f296e97d95e56f13b77351b32bec/src/mvlmm.cpp#L359). We see that there is code: `size_t n_size=eval->size, c_size=X->size1, d_size=D_l->size;` Presumably, this means that we're declaring the class of n_size, c_size, and d_size to be size_t. Furthermore, a statement like `n_size=eval->size` means that n_size is the number returned when size operates on eval. It makes sense that there is only one value for size of eval, since eval is a (one-dimensional) vector. Presumably, size might return the number of rows, number of columns, etc, as distinct numbers for the appropriate object, just like `dim` in R. Or, perhaps more accurately, you just need to append size wtih the dimension number... so, we see size1 applied to the X matrix. Hence, when dealing with the X matrix, there is a need to specify which dimension one is examining; thus, the use of `size1`, which, presumably, means the number of rows.
+
+## What is `D_l`?
+
+We know that it's a vector of length `d_size`. I couldn't remember where it is defined; a quick search of the repository took me to the line `EigenDecomp(V_e_temp, U_l, D_l, 0);`. I then had to remind myself what exactly `EigenDecomp` does. It seems that the eigenvalues of V_e_temp are stored in D_l. That is, D_l *is* the vector of eigenvalues from the decomposition of `V_e_temp`. Note that the last of the four entries, `0`, is passed as the value of the large matrix indicator.
+
+Note also that `U_l` is the matrix that contains the eigenvectors.
+
+In other words, `EigenDecomp` "creates" both `U_l` (matrix of eigenvectors for `V_e`) and `D_l` (vector of eigenvalues of `V_e`).
 
 
 
