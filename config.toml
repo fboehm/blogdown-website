@@ -1,4 +1,4 @@
-baseurl = "https://fboehm.us/"
+baseurl = "/"
 relativeurls = true
 languageCode = "en-us"
 title = "Frederick Boehm's Website"
@@ -6,7 +6,7 @@ theme = "hugo-lithium-theme"
 googleAnalytics = "UA-46757486-5"
 disqusShortname = "fredsblog2"
 ignoreFiles = ["\\.Rmd$", "_files$", "_cache$"]
-log: true
+
 
 
 
@@ -29,7 +29,6 @@ log: true
 
 [params]
     description = "Frederick Boehm's Website."
-
     # options for highlight.js (version, additional languages, and theme)
     highlightjsVersion = "9.11.0"
     highlightjsCDN = "//cdn.bootcss.com"
@@ -40,7 +39,7 @@ log: true
     MathJaxVersion = "2.7.1"
 
     [params.logo]
-    url = "images/boehm.png"
+    url = "boehm.png"
     width = 50
     height = 50
     alt = "Logo"
