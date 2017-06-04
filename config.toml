@@ -1,4 +1,4 @@
-baseurl = "https://fboehm.us/"
+baseurl = "/"
 relativeurls = true
 languageCode = "en-us"
 title = "Frederick Boehm's Website"
@@ -14,13 +14,15 @@ ignoreFiles = ["\\.Rmd$", "_files$", "_cache$"]
 [[menu.main]]
     name = "About"
     url = "/about/"
+    weight = 1
 [[menu.main]]
     name = "Research"
     url = "/research/"
+    weight = 2
 [[menu.main]]
     name = "Curriculum Vitae"
     url = "/curriculum-vitae/"
-
+    weight = 3
 
 [params]
     description = "Frederick Boehm's Website."

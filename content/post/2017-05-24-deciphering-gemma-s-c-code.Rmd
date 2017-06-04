@@ -245,7 +245,7 @@ They define the matrices `OmegaU` and `OmegaE`. Note that the two omega matrices
 
 ### calc_omega R code
 
-```{r}
+```{r, eval = FALSE}
 calc_omega <- function(eval, D_l){
   
 }
