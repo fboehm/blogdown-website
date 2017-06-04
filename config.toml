@@ -1,4 +1,4 @@
-baseurl = "https://fboehm.us/"
+baseurl = "/"
 relativeurls = true
 languageCode = "en-us"
 title = "Frederick Boehm's Website"
