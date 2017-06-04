@@ -13,7 +13,7 @@ googleAnalytics   = "UA-46757486-5"
 
 [permalinks]
 fixed = ":title/"
-blog  = "blog/:year/:month/:day/:slug/"
+blog  = "blog/:slug/"
 
 [params]
 author        = "Frederick Boehm" # Full name shows on blog post pages
