@@ -131,6 +131,36 @@ By searching the repository, I see that the function `EigenDecomp` is in lapack.
 
 I now see that the file lapack.cpp contains the code for the function `EigenDecomp`. See the full code [here](https://github.com/xiangzhou/GEMMA/blob/0885df136fcbe42b1665998f293953cfe8d216c6/src/lapack.cpp#L296-L379). It's interesting that there are two functions with the same name. They differ in use of 'float' objects. For the `EigenDecomp` without floats, we see that, when using LAPACK, the function `lapack_eigen_decomp` is used. `lapack_eigen_decomp` is defined starting at line 234 of lapack.cpp. Zhou's comment tells us that the first input is 'destroyed', i.e., over-written, when the function runs.
 
+### R code for eigen_proc
+
+```{r}
+eigen_proc <- function(Vg, Ve){
+  eigenVe <- eigen(Ve)
+  eigenVe$values -> Dl
+  eigenVe$vectors -> Ul
+  log(Dl) %>% sum() -> logdet_Ve
+  V_e_h <- matrix(0, nrow = length(Dl), ncol = length(Dl))
+  V_e_hi <- V_e_h
+  for (i in 1:length(Dl)){
+    V_e_h <- V_e_h + sqrt(Dl)[i] * Ul[, i] %*% t(Ul[, i])
+    V_e_hi <- V_e_hi + Ul[, i] %*% t(Ul[, i]) /  sqrt(Dl)[i]
+  }
+  VgVehi <- Vg %*% V_e_hi
+  Lambda <- V_e_hi %*% VgVehi
+  eigen(Lambda) -> eigenLambda
+  Ul <- eigenLambda$vectors
+  Dl <- eigenLambda$values
+  Dl[Dl < 0] <- 0
+  UltVeh <- t(Ul) %*% V_e_h
+  UltVehi <- t(Ul) %*% V_e_hi
+  return(list(logdet_Ve, UltVeh, UltVehi, Dl))
+}
+
+```
+
+
+
+
 
 ## `CalcQi`
 
@@ -185,6 +215,15 @@ The last line of `UpdateU` contains a call to [`gsl_matrix_mul_elements`](https:
 `UpdateE` is the [next function defined in mvlmm.cpp](https://github.com/xiangzhou/GEMMA/blob/338bf7b7db8805515597d9e2d4b5dcbe2e40dfd1/src/mvlmm.cpp#L421-L428). 
 
 First, note that `gsl_matrix_memcpy` copies the second argument's elements to the first input's elements. So, `gsl_matrix_memcpy(A, B)` assigns A to be a copy of B. Note that Zhou uses this function when he knows that subsequent steps will overwrite the matrix B, but B needs to be preserved.
+
+### calc_qi R code
+
+```{r}
+calc_qi <- function()
+```
+
+
+
 
 ## `UpdateL_B`
 
