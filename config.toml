@@ -1,72 +1,31 @@
-baseurl             = "/" # Must end with /
-languageCode        = "en-us"
-title               = "Frederick Boehm's Website"
-theme               = "hugo-theme-introduction"
-enforce_ssl         = "https://fboehm.us/"
-builddrafts         = false
-canonifyurls        = true
-contentdir          = "content"
-layoutdir           = "layouts"
-publishdir          = "public"
-disqusshortname   = "fredsblog2" # Enable Disqus for comments
-googleAnalytics   = "UA-46757486-5"
+baseurl = "https://fredboehm.us/"
+title = "Frederick Boehm's Website"
+languageCode = "en-us"
+paginate = "10" # Number of posts per page
+theme = "mainroad"
+disqusShortname = "fredsblog2" # Enable comments by entering your Disqus shortname
+googleAnalytics = "UA-46757486-5" # Enable Google Analytics by entering your tracking id
 
-[permalinks]
-fixed = ":title/"
-blog  = "blog/:slug/"
-
-[params]
-author        = "Frederick Boehm" # Full name shows on blog post pages
-firstname     = "Frederick" # First name shows in introduction on main page
-tagline       = " " # Appears after the introduction
-introheight   = "medium" # Input either 'medium' or 'large' or 'fullheight'
-theme         = "dark" # Choose 'light' or 'dark'
-avatar        = "img/boehm.png" # Path to image in static folder eg. img/avatar.png 
-email         = "frederick.boehm@gmail.com" # Shows in contact section, or leave blank to omit
-localtime     = true # Show your current local time in contact section
-timezone      = "America/Chicago" # Your timezone as in the TZ* column of this list: https://en.wikipedia.org/wiki/List_of_tz_database_time_zones
-dateform      = "Jan 2, 2006"
-dateformfull  = "Mon Jan 2 2006 15:04:05 EST"
-cachebuster   = true # Add the current unix timestamp in query string for cache busting css assets
-description   = "Website Description"
-faviconfile   = "img/fav.ico"
-highlightjs   = true # Syntax highlighting
-lang          = "en"
-footertext    = " " # Text to show in footer (overrides default text)
-fadein        = true # Turn on/off the fade-in effect
-
-showblog        = true # Show Blog section on home page
-showallposts    = false # Set 'true' to list all posts on home page, or set 'false' to link to separate blog list page
-showlatest      = true # Show latest blog post summary
-sharebuttons    = true # On post pages, show share this social buttons
-
-showprojects    = false # Show Projects section on home page
-
-# This is your projects section. Three images of the same dimensions will look the nicest. If images are omitted, text links will be shown.
-project1link    = "#"
-project1img     = "img/project1.jpg"
-project1title   = "Project 1"
-
-project2link    = "#"
-project2img     = "img/project2.jpg"
-project2title   = "Project 2"
-
-project3link    = "#"
-project3img     = "img/project3.jpg"
-project3title   = "Project 3"
+[Author]
+    name = "Frederick Boehm"
+    bio = "Frederick Boehm is a biostatistics researcher and teacher who lives in Madison, Wisconsin."
+    avatar = "img/boehm.png"
 
 
-# Social icons appear in introduction and contact section. Add as many more as you like.
-# Find icon names here: http://fontawesome.io/cheatsheet/
+[Params]
+    subtitle = "" # Subtitle of your site
+    description = " " # Description of your site
+    opengraph = true
+    readmore = true # Show "Read more" button in list if true
+    leftsidebar = false # Move sidebar to the left side if true
+    authorbox = true
+    post_navigation = true
+    postSections = ["post"]
 
-[[params.social]]
-url = "https://twitter.com/FredBoehm128/"
-icon = "twitter"
 
-[[params.social]]
-url = "https://facebook.com/fred.boehm.1/"
-icon = "facebook"
-
-[[params.social]]
-url = "https://linkedin.com/in/fredboehm/"
-icon = "linkedin"
+[Params.widgets]
+    search = true # Enable "Search" widget
+    recent_articles = true # Enable "Recent arcticles" widget
+    categories = true # Enable "Categories" widget
+    tags = true # Enable "Tags" widget
+        tags_counter = true # Enable counter for each tag in "Tags" widget (disabled by default)
