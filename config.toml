@@ -6,6 +6,9 @@ theme = "hugo-lithium-theme"
 googleAnalytics = "UA-46757486-5"
 disqusShortname = "fredsblog2"
 ignoreFiles = ["\\.Rmd$", "_files$", "_cache$"]
+log: true
+
+
 
 [permalinks]
     post = "/:year/:month/:day/:slug/"
