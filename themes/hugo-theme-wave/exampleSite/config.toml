@@ -1,21 +1,20 @@
-baseurl = "https://syui.github.io/"
+baseurl = "https://fboehm.us/"
 languageCode = "en-us"
-title = "hugo-theme-arch"
+title = "Frederick Boehm's Website"
 # Enable comments by entering your Disqus shortname
-disqusShortname = ""
+disqusShortname = "fredsblog2"
 # Enable Google Analytics by entering your tracking code
-googleAnalytics = ""
+googleAnalytics = "UA-46757486-5"
 # Define the number of posts per site
 paginate = 10
-theme = ""
-#theme = "hugo-theme-arch"
+theme = "hugo-theme-wave"
 
 [permalinks]
     post = "/:year/:month/:day/:slug"
 
 [params]
     # Tell me who you're
-    location = ""
+    location = "Madison, Wisconsin"
     site_description = ""
     copyright  = "Powered by [Hugo](//gohugo.io). Theme by [hugo-theme-arch](https://github.com/syui/hugo-theme-arch)."
 
@@ -32,16 +31,20 @@ theme = ""
     before = true
     label  = "Home"
     link   = "/"
+    weight = 1
 
 [[params.menu]]
     before = false
     label  = "Tags"
     link   = "tags/"
+    weight = 2
 
 [[params.menu]]
     before = false
     label  = "Categories"
     link   = "categories/"
+    weight = 3
+
 
 # Enter a link for the follow button on the left
 [params.profile]
@@ -52,7 +55,7 @@ theme = ""
 # Add your social network accounts to the profile section on the left
 # by entering your username. The links to your account will be
 # create automatically.
-    github          = ""
+    github          = "fboehm"
     bitbucket       = ""
     jsfiddle        = ""
     codepen         = ""
@@ -69,16 +72,16 @@ theme = ""
     wordpress       = ""
     tumblr          = ""
     xing            = ""
-    linkedin        = ""
+    linkedin        = "fredboehm"
     slideshare      = ""
     stackoverflow   = ""
     reddit          = ""
     pinterest       = ""
     googleplus      = ""
-    facebook        = ""
+    facebook        = "fred.boehm.1"
     facebook_admin  = ""
     twitter_domain  = ""
-    twitter         = ""
+    twitter         = "FredBoehm128"
 
 # Enable and disable widgets for the right sidebar
 [params.widgets]
