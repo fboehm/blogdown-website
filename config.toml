@@ -39,7 +39,7 @@ ignoreFiles = ["\\.Rmd$", "_files$", "_cache$"]
     MathJaxVersion = "2.7.1"
 
     [params.logo]
-    url = "boehm.png"
+    url = "logo.png"
     width = 50
     height = 50
     alt = "Logo"
