@@ -1,30 +1,30 @@
 baseurl             = "/" # Must end with /
 languageCode        = "en-us"
-title               = "Frederick Boehm's Website"
-theme               = "hugo-theme-introduction"
-enforce_ssl         = "https://fboehm.us/"
+title               = "Introduction"
+theme               = "introduction"
+enforce_ssl         = "your-url.com"
 builddrafts         = false
 canonifyurls        = true
 contentdir          = "content"
 layoutdir           = "layouts"
 publishdir          = "public"
-disqusshortname   = "fredsblog2" # Enable Disqus for comments
-googleAnalytics   = "UA-46757486-5"
+# disqusshortname   = "xxx" # Enable Disqus for comments
+# googleAnalytics   = "xxx"
 
 [permalinks]
 fixed = ":title/"
 blog  = "blog/:slug/"
 
 [params]
-author        = "Frederick Boehm" # Full name shows on blog post pages
-firstname     = "Frederick" # First name shows in introduction on main page
-tagline       = " " # Appears after the introduction
-introheight   = "medium" # Input either 'medium' or 'large' or 'fullheight'
+author        = "A Clever Author" # Full name shows on blog post pages
+firstname     = "awesome" # First name shows in introduction on main page
+tagline       = "I'm a theme for Hugo." # Appears after the introduction
+introheight   = "large" # Input either 'medium' or 'large' or 'fullheight'
 theme         = "dark" # Choose 'light' or 'dark'
-avatar        = "img/boehm.png" # Path to image in static folder eg. img/avatar.png 
-email         = "frederick.boehm@gmail.com" # Shows in contact section, or leave blank to omit
+avatar        = "img/profile.png" # Path to image in static folder eg. img/avatar.png 
+email         = "youremail@email.com" # Shows in contact section, or leave blank to omit
 localtime     = true # Show your current local time in contact section
-timezone      = "America/Chicago" # Your timezone as in the TZ* column of this list: https://en.wikipedia.org/wiki/List_of_tz_database_time_zones
+timezone      = "America/Los_Angeles" # Your timezone as in the TZ* column of this list: https://en.wikipedia.org/wiki/List_of_tz_database_time_zones
 dateform      = "Jan 2, 2006"
 dateformfull  = "Mon Jan 2 2006 15:04:05 EST"
 cachebuster   = true # Add the current unix timestamp in query string for cache busting css assets
@@ -32,7 +32,7 @@ description   = "Website Description"
 faviconfile   = "img/fav.ico"
 highlightjs   = true # Syntax highlighting
 lang          = "en"
-footertext    = " " # Text to show in footer (overrides default text)
+footertext    = "" # Text to show in footer (overrides default text)
 fadein        = true # Turn on/off the fade-in effect
 
 showblog        = true # Show Blog section on home page
@@ -40,7 +40,7 @@ showallposts    = false # Set 'true' to list all posts on home page, or set 'fal
 showlatest      = true # Show latest blog post summary
 sharebuttons    = true # On post pages, show share this social buttons
 
-showprojects    = false # Show Projects section on home page
+showprojects    = true # Show Projects section on home page
 
 # This is your projects section. Three images of the same dimensions will look the nicest. If images are omitted, text links will be shown.
 project1link    = "#"
@@ -60,13 +60,13 @@ project3title   = "Project 3"
 # Find icon names here: http://fontawesome.io/cheatsheet/
 
 [[params.social]]
-url = "https://twitter.com/FredBoehm128/"
+url = "https://twitter.com/"
 icon = "twitter"
 
 [[params.social]]
-url = "https://facebook.com/fred.boehm.1/"
+url = "https://facebook.com/"
 icon = "facebook"
 
 [[params.social]]
-url = "https://linkedin.com/in/fredboehm/"
+url = "https://linkedin.com/"
 icon = "linkedin"
