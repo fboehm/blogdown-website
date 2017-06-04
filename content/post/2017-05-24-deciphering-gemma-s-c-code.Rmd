@@ -218,7 +218,7 @@ First, note that `gsl_matrix_memcpy` copies the second argument's elements to th
 
 ### calc_qi R code
 
-```{r}
+```{r, eval = FALSE}
 calc_qi <- function()
 ```
 

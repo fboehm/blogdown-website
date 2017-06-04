@@ -6,17 +6,17 @@
     <description>Recent content in Genetics on Frederick Boehm&#39;s Website</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Wed, 31 May 2017 15:40:27 +0000</lastBuildDate>
+    <lastBuildDate>Sun, 04 Jun 2017 09:12:58 +0000</lastBuildDate>
     
 	<atom:link href="/tags/genetics/index.xml" rel="self" type="application/rss+xml" />
     
     
     <item>
       <title>Deciphering GEMMA’s C&#43;&#43; Code</title>
-      <link>/2017/05/31/deciphering-gemma-s-c-code/</link>
-      <pubDate>Wed, 31 May 2017 15:40:27 +0000</pubDate>
+      <link>/2017/06/04/deciphering-gemma-s-c-code/</link>
+      <pubDate>Sun, 04 Jun 2017 09:12:58 +0000</pubDate>
       
-      <guid>/2017/05/31/deciphering-gemma-s-c-code/</guid>
+      <guid>/2017/06/04/deciphering-gemma-s-c-code/</guid>
       <description>My goal is to translate the C++ code in GEMMA/src/mvlmm.cpp to mathematical notation and, ultimately, to R code. Zhou’s C++ code uses the gsl C++ library.
 CalcXHiY C++ code Let’s examine the function CalcXHiY which runs from line 357-384 of mvlmm.cpp. I reproduce them here:
 void CalcXHiY(const gsl_vector *eval, const gsl_vector *D_l, const gsl_matrix *X, const gsl_matrix *UltVehiY, gsl_vector *xHiy) { size_t n_size=eval-&amp;gt;size, c_size=X-&amp;gt;size1, d_size=D_l-&amp;gt;size; gsl_vector_set_zero (xHiy); double x, delta, dl, y, d; for (size_t i=0; i&amp;lt;d_size; i++) { dl=gsl_vector_get(D_l, i); for (size_t j=0; j&amp;lt;c_size; j++) { d=0.</description>
