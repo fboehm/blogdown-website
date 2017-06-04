@@ -13,7 +13,7 @@ googleAnalytics = "UA-46757486-5" # Enable Google Analytics by entering your tra
 
 
 [Params]
-    subtitle = "" # Subtitle of your site
+    subtitle = "Biostatistics, genetics, and medicine" # Subtitle of your site
     description = " " # Description of your site
     opengraph = true
     readmore = true # Show "Read more" button in list if true
