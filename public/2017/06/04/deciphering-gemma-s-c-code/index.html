@@ -185,6 +185,12 @@
 <p>The matrix inverse gets passed to the function <a href="https://github.com/xiangzhou/GEMMA/blob/338bf7b7db8805515597d9e2d4b5dcbe2e40dfd1/src/mvlmm.cpp#L348"><code>LULndet</code></a>, which is defined in the file <a href="https://github.com/xiangzhou/GEMMA/blob/03d7d2556a9284dc0ac3e155b5c9a8d69b1b21ee/src/lapack.cpp#L533-L538">lapack.cpp</a></p>
 <p>The key line is that containing a call to the function <code>gsl_linalg_LU_lndet</code>. We find documentation of the function <a href="https://www.gnu.org/software/gsl/manual/html_node/LU-Decomposition.html">here</a>.</p>
 <p>Lines to free the memory complete the function.</p>
+<div id="calc_qi-r-code" class="section level3">
+<h3>calc_qi R code</h3>
+<pre class="r"><code>calc_qi &lt;- function(eval, D_l, X){
+  
+}</code></pre>
+</div>
 </div>
 <div id="calcomega" class="section level2">
 <h2><code>CalcOmega</code></h2>
@@ -204,10 +210,6 @@
 <h2><code>UpdateE</code></h2>
 <p><code>UpdateE</code> is the <a href="https://github.com/xiangzhou/GEMMA/blob/338bf7b7db8805515597d9e2d4b5dcbe2e40dfd1/src/mvlmm.cpp#L421-L428">next function defined in mvlmm.cpp</a>.</p>
 <p>First, note that <code>gsl_matrix_memcpy</code> copies the second argument’s elements to the first input’s elements. So, <code>gsl_matrix_memcpy(A, B)</code> assigns A to be a copy of B. Note that Zhou uses this function when he knows that subsequent steps will overwrite the matrix B, but B needs to be preserved.</p>
-<div id="calc_qi-r-code" class="section level3">
-<h3>calc_qi R code</h3>
-<pre class="r"><code>calc_qi &lt;- function()</code></pre>
-</div>
 </div>
 <div id="updatel_b" class="section level2">
 <h2><code>UpdateL_B</code></h2>

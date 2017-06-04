@@ -194,11 +194,68 @@ The key line is that containing a call to the function `gsl_linalg_LU_lndet`. We
 
 Lines to free the memory complete the function.
 
+### calc_qi R code
+
+```{r}
+calc_qi <- function(eval, D_l, X){
+  n_size <- length(eval)
+  d_size <- length(D_l)
+  c_size <- nrow(X)# what is c_size? it's the number of rows in the transposed genotypes matrix
+  # transposed genotypes matrix is c by n
+  dc_size <- d_size * c_size
+  Q <- matrix(0, nrow = dc_size, ncol = dc_size)
+  
+  for (i in 1:c_size){
+    for (j in 1:c_size){
+      for (l in 1:d_size){
+        dl <- D_l[l]
+        if (j < i){
+          d <- Q[j * d_size + l, i * d_size + l]
+        } else {
+          d <- 0
+          for (k in 1:n_size){
+            d1 <- X[i, k]
+            d2 <- X[j, k]
+            delta <- eval[k]
+            d <- d + d1 * d2 / (dl * delta + 1)
+          }
+        }
+        Q[i * d_size + l, j * d_size + l] <- d
+      }
+    }
+  }
+  Qi <- solve(Q)
+  detQ <- det(Q)
+  lndetQ <- log(detQ)
+  return(list(Qi, lndetQ))
+}
+```
+
+
+
+
+
+
+
 ## `CalcOmega`
 
 [Lines](https://github.com/xiangzhou/GEMMA/blob/338bf7b7db8805515597d9e2d4b5dcbe2e40dfd1/src/mvlmm.cpp#L389-L408) of mvlmm.cpp contain code for `CalcOmega`.
 
 They define the matrices `OmegaU` and `OmegaE`. Note that the two omega matrices differ by a multiplicative factor.
+
+### calc_omega R code
+
+```{r}
+calc_omega <- function(eval, D_l){
+  
+}
+```
+
+
+
+
+
+
 
 ## `UpdateU`
 
@@ -215,12 +272,6 @@ The last line of `UpdateU` contains a call to [`gsl_matrix_mul_elements`](https:
 `UpdateE` is the [next function defined in mvlmm.cpp](https://github.com/xiangzhou/GEMMA/blob/338bf7b7db8805515597d9e2d4b5dcbe2e40dfd1/src/mvlmm.cpp#L421-L428). 
 
 First, note that `gsl_matrix_memcpy` copies the second argument's elements to the first input's elements. So, `gsl_matrix_memcpy(A, B)` assigns A to be a copy of B. Note that Zhou uses this function when he knows that subsequent steps will overwrite the matrix B, but B needs to be preserved.
-
-### calc_qi R code
-
-```{r, eval = FALSE}
-calc_qi <- function()
-```
 
 
 
