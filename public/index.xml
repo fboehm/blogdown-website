@@ -6,7 +6,7 @@
     <description>Recent content on Frederick Boehm&#39;s Website</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Sun, 04 Jun 2017 09:19:30 +0000</lastBuildDate>
+    <lastBuildDate>Sun, 04 Jun 2017 11:25:29 +0000</lastBuildDate>
     
 	<atom:link href="/index.xml" rel="self" type="application/rss+xml" />
     
@@ -14,7 +14,7 @@
     <item>
       <title>Deciphering GEMMA’s C&#43;&#43; Code</title>
       <link>/2017/06/04/deciphering-gemma-s-c-code/</link>
-      <pubDate>Sun, 04 Jun 2017 09:19:30 +0000</pubDate>
+      <pubDate>Sun, 04 Jun 2017 11:25:29 +0000</pubDate>
       
       <guid>/2017/06/04/deciphering-gemma-s-c-code/</guid>
       <description>My goal is to translate the C++ code in GEMMA/src/mvlmm.cpp to mathematical notation and, ultimately, to R code. Zhou’s C++ code uses the gsl C++ library.

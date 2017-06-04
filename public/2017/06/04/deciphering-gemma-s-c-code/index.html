@@ -59,7 +59,7 @@
 
   <article class="article">
     
-    <span class="article-duration">17 min read</span>
+    <span class="article-duration">18 min read</span>
     
 
     <h1 class="article-title">Deciphering GEMMA’s C&#43;&#43; Code</h1>
@@ -188,7 +188,36 @@
 <div id="calc_qi-r-code" class="section level3">
 <h3>calc_qi R code</h3>
 <pre class="r"><code>calc_qi &lt;- function(eval, D_l, X){
+  n_size &lt;- length(eval)
+  d_size &lt;- length(D_l)
+  c_size &lt;- nrow(X)# what is c_size? it&#39;s the number of rows in the transposed genotypes matrix
+  # transposed genotypes matrix is c by n
+  dc_size &lt;- d_size * c_size
+  Q &lt;- matrix(0, nrow = dc_size, ncol = dc_size)
   
+  for (i in 1:c_size){
+    for (j in 1:c_size){
+      for (l in 1:d_size){
+        dl &lt;- D_l[l]
+        if (j &lt; i){
+          d &lt;- Q[j * d_size + l, i * d_size + l]
+        } else {
+          d &lt;- 0
+          for (k in 1:n_size){
+            d1 &lt;- X[i, k]
+            d2 &lt;- X[j, k]
+            delta &lt;- eval[k]
+            d &lt;- d + d1 * d2 / (dl * delta + 1)
+          }
+        }
+        Q[i * d_size + l, j * d_size + l] &lt;- d
+      }
+    }
+  }
+  Qi &lt;- solve(Q)
+  detQ &lt;- det(Q)
+  lndetQ &lt;- log(detQ)
+  return(list(Qi, lndetQ))
 }</code></pre>
 </div>
 </div>
@@ -196,6 +225,12 @@
 <h2><code>CalcOmega</code></h2>
 <p><a href="https://github.com/xiangzhou/GEMMA/blob/338bf7b7db8805515597d9e2d4b5dcbe2e40dfd1/src/mvlmm.cpp#L389-L408">Lines</a> of mvlmm.cpp contain code for <code>CalcOmega</code>.</p>
 <p>They define the matrices <code>OmegaU</code> and <code>OmegaE</code>. Note that the two omega matrices differ by a multiplicative factor.</p>
+<div id="calc_omega-r-code" class="section level3">
+<h3>calc_omega R code</h3>
+<pre class="r"><code>calc_omega &lt;- function(eval, D_l){
+  
+}</code></pre>
+</div>
 </div>
 <div id="updateu" class="section level2">
 <h2><code>UpdateU</code></h2>
