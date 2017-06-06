@@ -14,8 +14,6 @@ weight = 60
 
 +++
 
-This is an example of using the *custom* widget to create your own homepage section.
-
 I have taught the following semester-long courses:
 
 Applied statistics for engineers  
