@@ -24,8 +24,8 @@ defaultContentLanguageInSubdir = false
   organization = "University of Wisconsin-Madison"
   organization_url = "http://www.wisc.edu"
   avatar = "boehm.png"
-  email = "test@example.org"
-  address = "Building 1 Room 1, Stanford University, California, 90210, USA"
+  email = "frederick.boehm@gmail.com"
+  address = "1220 Medical Sciences Center, 1300 University Avenue, Madison, WI 53706"
   office_hours = ""
   phone = "715 252 3929"
   skype = ""
@@ -40,7 +40,7 @@ defaultContentLanguageInSubdir = false
 
   # Enable global LaTeX math rendering?
   #   If false, you can enable it locally on a per page basis.
-  math = false
+  math = true
 
   # Highlight.js options
   #   highlight
@@ -76,7 +76,7 @@ defaultContentLanguageInSubdir = false
   #   For more info on the highlighting options, see:
   #   https://gcushen.github.io/hugo-academic-demo/post/writing-markdown-latex/#highlighting-options
   highlight = true
-  highlight_languages = []
+  highlight_languages = ["r"]
   # highlight_style = "github"
   # highlight_version = "9.9.0"
 
