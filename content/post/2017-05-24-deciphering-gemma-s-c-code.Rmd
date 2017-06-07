@@ -247,7 +247,21 @@ They define the matrices `OmegaU` and `OmegaE`. Note that the two omega matrices
 
 ```{r, eval = FALSE}
 calc_omega <- function(eval, D_l){
-  
+  n_size <- length(eval)
+  d_size <- length(D_l)
+  OmegaU <- matrix(nrow = d_size, ncol = n_size)
+  OmegaE <- OmegaU
+  for (k in 1:n_size){
+    delta <- eval[k]
+    for (i in 1:d_size){
+      dl <- D_l[i]
+      d_u <- dl / (delta * dl + 1)
+      d_e <- d_u * delta
+      OmegaU[i, k] <- d_u
+      OmegaE[i, k] <- d_e
+    }
+  }
+  return(list(OmegaU, OmegaE))
 }
 ```
 
@@ -267,12 +281,38 @@ The last line of `UpdateU` contains a call to [`gsl_matrix_mul_elements`](https:
 
 > This function multiplies the elements of matrix a by the elements of matrix b. The result a(i,j) \leftarrow a(i,j) * b(i,j) is stored in a and b remains unchanged. The two matrices must have the same dimensions.
 
+### R Code for update_u
+
+```{r}
+update_u <- function(OmegaE, UltVehiY, UltVehiBX){
+  UltVehiU <- UltVehiY
+  UltVehiU <- UltVehiU - UltVehiBX
+  UltVehiU <- UltVehiU * OmegaE
+  return(UltVehiU)
+}
+
+```
+
+
+
+
+
 ## `UpdateE`
 
 `UpdateE` is the [next function defined in mvlmm.cpp](https://github.com/xiangzhou/GEMMA/blob/338bf7b7db8805515597d9e2d4b5dcbe2e40dfd1/src/mvlmm.cpp#L421-L428). 
 
 First, note that `gsl_matrix_memcpy` copies the second argument's elements to the first input's elements. So, `gsl_matrix_memcpy(A, B)` assigns A to be a copy of B. Note that Zhou uses this function when he knows that subsequent steps will overwrite the matrix B, but B needs to be preserved.
 
+### R code for update_e
+
+```{r}
+update_e <- function(UltVehiY, UltVehiBX, UltVehiU){
+  UltVehiY -> UltVehiE
+  UltVehiE <- UltVehiE - UltVehiBX
+  UltVehiE <- UltVehiE - UltVehiU
+  return(UltVehiE)
+}
+```
 
 
 
@@ -312,6 +352,9 @@ The [documentation](https://www.gnu.org/software/gsl/manual/html_node/Level-3-GS
 Thus the line `gsl_blas_dgemm(CblasNoTrans, CblasTrans, 1.0, UltVehiBX, X, 0.0, YUX);` calculates the product `UltVehiBX * t(X)` where t(X) denotes the transpose of X and `*` denotes matrix multiplication, since the value of `beta` here is 0.0 (and `alpha` is 1.0). The result is stored as `YUX`.
 
 Finally, we calculate the matrix product `YUX * XXti` and stored it as `UltVehiB`.
+
+
+
 
 ## `UpdateRL_B`
 
@@ -374,6 +417,27 @@ The function is documented [here](https://www.gnu.org/software/gsl/manual/html_n
 > The function gsl_vector_const_subvector is equivalent to gsl_vector_subvector but can be used for vectors which are declared const.
 
 Together, the lines contained in the `for` loop serve to copy the elements of the vector `b` into the matrix `UltVehiB`, where each element of `b` is entered exactly once into `UltVehiB`.
+
+### R code for updateRL_B
+
+
+```{r}
+updateRL_B <- function(xHiy, Qi, d_size){
+  nrow(Qi) -> dc_size
+  c_size <- dc_size / d_size
+  b <- vector(length = dc_size)
+  b <- Qi %*% xHiy
+  for (i in 1:c_size){
+    b_subcol <- b[1 + (i - 1) * d_size, i * d_size]
+    b_subcol -> UltVehiB[, i] # could use as.matrix here
+  }
+  return(UltVehiB)
+}
+```
+
+
+
+
 
 ## `UpdateV`
 
@@ -450,6 +514,34 @@ Thus, the line
 `gsl_matrix_scale (V_g, 1.0/(double)n_size);` 
 
 leads to each entry of `V_g` being divided by `n_size` (with the result stored as the new value of `V_g`).
+
+### R code for update_v
+
+```{r}
+update_v <- function(eval, U, E, Sigma_uu, Sigma_ee){
+  n_size <- length(eval)
+  d_size <- nrow(U)
+  V_g <- matrix(0, nrow = n_size, ncol = n_size)
+  V_e <- V_g
+  for (k in 1:n_size){
+    delta <- eval[k]
+    if (delta != 0){
+      U_col <- U[, k]
+      V_g <- V_g + U_col %*% t(U_col) / delta
+    }
+  }
+  V_e <- E %*% t(E)
+  V_g <- V_g + Sigma_uu
+  V_e <- V_e + Sigma_ee
+  V_g <- V_g / n_size
+  V_e <- V_e / n_size
+  return(list(V_e, V_g))
+}
+```
+
+
+
+
 
 ## `CalcSigma`
 
