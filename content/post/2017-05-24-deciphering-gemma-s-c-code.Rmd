@@ -117,6 +117,36 @@ The use of `1.0` rather than merely `1` seems peculiar to me - I'm new to C++. I
 
 Since we're looping over `k`, it's as if we're taking the inner (dot) product of two vectors and defining it to be the number `d` (after the looping over k).
 
+### R code for calc_XHiY
+
+```{r}
+calc_XHiY <- function(eval, D_l, X, UltVehiY){
+  n_size <- length(eval)
+  c_size <- nrow(X)
+  d_size <- length(D_l)
+  xHiy <- numeric(length = d_size * c_size)
+  for (i in 1:d_size){
+    dl <- D_l[i]
+    for (j in 1:c_size){
+      d <- 0
+      for (k in 1:n_size){
+        x <- X[j, k]
+        y <- UltVehiY[i, k]
+        delta <- eval[k]
+        d<- d + x * y / (delta * dl + 1)
+      }
+    }
+    xHiy[(j-1) * d_size + i] <- d
+  }
+  return(xHiy)
+}
+```
+
+
+
+
+
+
 ## `EigenProc`
 
 I want to understand the function `EigenProc`, which occupies [lines 215-307](https://github.com/xiangzhou/GEMMA/blob/0885df136fcbe42b1665998f293953cfe8d216c6/src/mvlmm.cpp#L215-L307) of `mvlmm.cpp`.
@@ -547,6 +577,13 @@ update_v <- function(eval, U, E, Sigma_uu, Sigma_ee){
 
 Our next function to consider is [`CalcSigma`](https://github.com/xiangzhou/GEMMA/blob/5252c296a389f296e97d95e56f13b77351b32bec/src/mvlmm.cpp#L512-L579).
 
+```{rcpp, eval = FALSE}
+void CalcSigma (const char func_name, const gsl_vector *eval, const gsl_vector *D_l, const gsl_matrix *X, const gsl_matrix *OmegaU, const gsl_matrix *OmegaE, const gsl_matrix *UltVeh, const gsl_matrix *Qi, gsl_matrix *Sigma_uu, gsl_matrix *Sigma_ee)
+
+```
+
+
+
 First, `Sigma_uu` and `Sigma_ee` are set to be matrices with all zeros.
 
 `gsl_matrix_diagonal` is used to get the diagonal entries of the matrices.
@@ -563,6 +600,89 @@ For now, I'll skip the [section of code that's labeled "calculate the second ter
 
 
 We then have [four matrix multiplication operations](https://github.com/xiangzhou/GEMMA/blob/5252c296a389f296e97d95e56f13b77351b32bec/src/mvlmm.cpp#L572-L575) to complete the function definition.
+
+### R code for calc_sigma
+
+```{r}
+calc_sigma <- function(eval, D_l, X, OmegaU, OmegaE, UltVeh, Qi, func_name = "R"){
+  n_size <- length(eval)
+  c_size <- nrow(X)
+  d_size <- length(D_l)
+  dc_size <- nrow(Qi)
+  Sigma_ee <- matrix(0, nrow = d_size, ncol = d_size)
+  Sigma_uu <- Sigma_ee
+  for (k in 1:n_size){
+    OmegaU_col <- OmegaU[, k]
+    OmegaE_col <- OmegaE[, k]
+    diag(Sigma_ee) <- diag(Sigma_ee) + OmegaE_col
+    diag(Sigma_uu) <- diag(Sigma_uu) + OmegaU_col
+  }
+  if (func_name == "R"){
+    M_u <- matrix(0, nrow = dc_size, ncol = d_size)
+    M_e <- M_u
+    Qi <- M_e
+    for (k in 1:n_size){
+      delta <- eval[k]
+      for (i in 1:d_size){
+        dl <- D_l[i]
+        for (j in 1:c_size){
+          x <- X[j, k]
+          d <- x / (delta * dl + 1)
+          M_e[j * d_size + i, i] <- d
+          M_u[j * d_size + i, i] <- d * dl
+          
+        }
+      }
+      QiM <- Qi %*% M_u
+      Sigma_uu <- Sigma_uu + t(M_u) %*% QiM * delta
+      QiM <- Qi %*% M_e
+      Sigma_ee <- Sigma_ee + t(M_e) %*% QiM
+    }
+  }
+  M <- Sigma_uu %*% UltVeh
+  Sigma_uu <- t(UltVeh) %*% M
+  M <- Sigma_ee %*% UltVeh
+  Sigma_ee <- t(UltVeh) %*% M
+  return(list(Sigma_ee, Sigma_uu))
+}
+```
+
+
+## `MphCalcLogL`
+
+```{rcpp, eval = FALSE}
+double MphCalcLogL (const gsl_vector *eval, const gsl_vector *xHiy, const gsl_vector *D_l, const gsl_matrix *UltVehiY, const gsl_matrix *Qi)
+{
+	size_t n_size=eval->size, d_size=D_l->size, dc_size=Qi->size1;
+	double logl=0.0, delta, dl, y, d;
+
+	//calculate yHiy+log|H_k|
+	for (size_t k=0; k<n_size; k++) {
+		delta=gsl_vector_get(eval, k);
+		for (size_t i=0; i<d_size; i++) {
+			y=gsl_matrix_get(UltVehiY, i, k);
+			dl=gsl_vector_get(D_l, i);
+			d=delta*dl+1.0;
+
+			logl+=y*y/d+log(d);
+		}
+	}
+
+	//calculate the rest of yPxy
+	gsl_vector *Qiv=gsl_vector_alloc(dc_size);
+
+	gsl_blas_dgemv(CblasNoTrans, 1.0, Qi, xHiy, 0.0, Qiv);
+	gsl_blas_ddot(xHiy, Qiv, &d);
+
+	logl-=d;
+
+	gsl_vector_free(Qiv);
+
+	return -0.5*logl;
+}
+```
+
+
 
 ## `MphEM`
 
@@ -664,5 +784,41 @@ Recall that, according to Zhou's notation:
 5. 
 
 
+### R code for MphEM
+
+```{r}
+MphEM <- function(func_name = "R", max_iter = 10000, max_prec = 1 / 1000, eval, X, Y, U_hat, E_hat, OmegaU, OmegaE, UltVehiY, UltVehiBX, UltVehiU, UltVehiE, V_g, V_e, B){
+  n_size <- length(eval)
+  c_size <- nrow(X)
+  d_size <- nrow(Y)
+  dc_size <- c_size * d_size
+  # calculate XXt and XXti
+  XXt <- X %*% t(X)
+  XXti <- solve(XXt)
+  # calculate constant for logl
+  if (func_name == "R"){
+    logl_const <- (n_size - c_size) * d_size * log(2 * pi) / 2 + d_size * log(det(XXt)) / 2
+  } else {
+    logl_const <- n_size * d_size * log(2 * pi) / 2 
+  }
+  # start EM
+  for (t in 1:max_iter){
+    # eigen_proc
+    ep_out <- eigen_proc(V_g, V_e)
+    ep_out[[1]] -> logdet_Ve
+    ep_out[[2]] -> UltVeh
+    ep_out[[3]] -> UltVehi
+    ep_out[[4]] -> D_l
+    # calc_qi
+    cq_out <- calc_qi(eval, D_l, X)
+    cq_out[[1]] -> Qi
+    cq_out[[2]] -> lndetQ
+    # 
+    UltVehiY <- UltVehi %*% Y
+    # 
+    xHiy <- calc_XHiY(eval, D_l, X, UltVehiY)
+  }
+}
+```
 
 
