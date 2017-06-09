@@ -801,6 +801,7 @@ MphEM <- function(func_name = "R", max_iter = 10000, max_prec = 1 / 1000, eval, 
   } else {
     logl_const <- n_size * d_size * log(2 * pi) / 2 
   }
+  out <- list()
   # start EM
   for (t in 1:max_iter){
     # eigen_proc
@@ -817,7 +818,33 @@ MphEM <- function(func_name = "R", max_iter = 10000, max_prec = 1 / 1000, eval, 
     UltVehiY <- UltVehi %*% Y
     # 
     xHiy <- calc_XHiY(eval, D_l, X, UltVehiY)
+    logl_new <- logl_const + MphCalcLogL(eval, xHiy, D_l, UltVehiY, Qi) - 0.5 * n_size * logdet_Ve
+    if (func_name=='R') {
+			logl_new<- logl_new - 0.5 * (lndetQ - c_size * logdet_Ve)
+		}
+		if (t > 1 & abs(logl_new - logl_old) < max_prec) {break}
+		logl_old <- logl_new
+		co_out <- calc_omega(eval, D_l)
+		co_out[[1]] -> OmegaU
+		co_out[[2]] -> OmegaE
+		if (func_name == 'R') {
+			UltVehiB <- UpdateRL_B(xHiy, Qi)
+			UltVehiBX <- UltVehiB %*% X
+		}
+		UltVehiU <- update_u(OmegaE, UltVehiY, UltVehiBX)
+		UltVehiE <- update_e(UltVehiY, UltVehiBX, UltVehiU)
+		U_hat <- t(UltVeh) %*% UltVehiU
+		E_hat <- t(UltVeh) %*% UltVehiE
+		B <- t(UltVeh) %*% UltVehiB 
+		cs_out <- calc_sigma(func_name, eval, D_l, X, OmegaU, OmegaE, UltVeh, Qi)
+		cs_out[[1]] -> Sigma_uu
+		cs_out[[2]] -> Sigma_ee
+		uv_out <- update_v(eval, U_hat, E_hat, Sigma_uu, Sigma_ee)
+		uv_out[[1]] -> V_g
+		uv_out[[2]] -> V_e
+		out[[t]] <- list(logl_new, V_g, V_e)
   }
+  return(out)
 }
 ```
 
