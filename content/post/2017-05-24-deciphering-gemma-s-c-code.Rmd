@@ -784,6 +784,69 @@ Recall that, according to Zhou's notation:
 5. 
 
 
+
+### C++ Code for MphCalcLogL
+
+```{rcpp}
+double MphCalcLogL (const gsl_vector *eval, const gsl_vector *xHiy, const gsl_vector *D_l, const gsl_matrix *UltVehiY, const gsl_matrix *Qi)
+{
+size_t n_size=eval->size, d_size=D_l->size, dc_size=Qi->size1;
+	double logl=0.0, delta, dl, y, d;
+
+	//calculate yHiy+log|H_k|
+	for (size_t k=0; k<n_size; k++) {
+		delta=gsl_vector_get(eval, k);
+		for (size_t i=0; i<d_size; i++) {
+			y=gsl_matrix_get(UltVehiY, i, k);
+			dl=gsl_vector_get(D_l, i);
+			d=delta*dl+1.0;
+
+			logl+=y*y/d+log(d);
+		}
+	}
+
+	//calculate the rest of yPxy
+	gsl_vector *Qiv=gsl_vector_alloc(dc_size);
+
+	gsl_blas_dgemv(CblasNoTrans, 1.0, Qi, xHiy, 0.0, Qiv);
+	gsl_blas_ddot(xHiy, Qiv, &d);
+
+	logl-=d;
+
+	gsl_vector_free(Qiv);
+
+	return -0.5*logl;
+}
+```
+
+
+
+### R code for MphCalcLogL
+
+```{r}
+MphCalcLogL <- function(eval, D_l, Qi, UltVehiY, xHiy){
+  n_size <- length(eval)
+  d_size <- length(D_l)
+  dc_size <- nrow(Qi)
+  logl <- 0
+  for (k in 1:n_size){
+    delta <- eval[k]
+    for (i in 1:d_size){
+      y <- UltVehiY[i, k]
+      dl <- D_l[i]
+      d <- delta * dl + 1
+      logl <- logl + y^2 / d + log(d)
+    }
+  }
+  Qiv <- Qi %*% xHiy
+  d <- t(xHiy) %*% Qiv
+  logl <- logl - d
+  return(- 0.5 * logl)
+}
+```
+
+
+
 ### R code for MphEM
 
 ```{r}
