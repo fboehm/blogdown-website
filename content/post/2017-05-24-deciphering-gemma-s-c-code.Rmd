@@ -911,4 +911,29 @@ MphEM <- function(func_name = "R", max_iter = 10000, max_prec = 1 / 1000, eval, 
 }
 ```
 
+## Running `MphEM()` with real data
+
+First, we read in the GEMMA example data.
+
+```{r}
+library(readr)
+library(tidyverse)
+anno <- read_delim("~/GEMMA/example/mouse_hs1940.anno.txt", delim = "\t", col_names = c("rs_id", "position", "chromosome", "cM"))
+geno <- read_delim("~/GEMMA/example/mouse_hs1940.geno.txt", delim = ",", col_names = FALSE) %>%
+  rename(rs_id = X1, major = X2, minor = X3)
+pheno <- read_delim("~/GEMMA/example/mouse_hs1940.pheno.txt", delim = "\t", col_names = FALSE)
+```
+
+```{r}
+# read relatedness matrix & remove last column of all NAs
+relatedness <- read_delim("~/GEMMA/example/output/mouse_hs1940.cXX.txt", delim = "\t", col_names = FALSE)[, - 1941] %>%
+  as.matrix()
+# decompose the relatedness matrix
+eigen(relatedness) -> eigen_out
+
+```
+
+
+
+
 
