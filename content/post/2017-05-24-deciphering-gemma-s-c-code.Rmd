@@ -787,7 +787,7 @@ Recall that, according to Zhou's notation:
 
 ### C++ Code for MphCalcLogL
 
-```{rcpp}
+```{rcpp, eval = FALSE}
 double MphCalcLogL (const gsl_vector *eval, const gsl_vector *xHiy, const gsl_vector *D_l, const gsl_matrix *UltVehiY, const gsl_matrix *Qi)
 {
 size_t n_size=eval->size, d_size=D_l->size, dc_size=Qi->size1;
