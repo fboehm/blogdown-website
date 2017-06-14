@@ -53,8 +53,20 @@ MphNR <- function(){
       step_scale <- step_scale / 2
       step_iter <- step_iter + 1
     } # end of while loop
-    
+    if (t > 1){
+      if (logl_new < logl_old | flag_pd == 0) {
+				V_g <- Vg_save
+				V_e <- Ve_save
+				break
+      }
+      if (logl_new - logl_old < max_prec) {
+				break
+      }
+    logl_old <- logl_new
+    CalcDev()
+    }
   } # end of loop over t
+  return(logl_new)
 } # end of function
 ```
 
@@ -77,12 +89,5 @@ The [do-while loop](https://github.com/xiangzhou/GEMMA/blob/3ed15d7061fdac57c07d
 ### `Calc_yHiy`
 
 
-
-
-
-
-
-
-
-
+### `CalcDev`
 
