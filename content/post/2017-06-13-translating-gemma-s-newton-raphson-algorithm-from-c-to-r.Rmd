@@ -76,6 +76,80 @@ The [do-while loop](https://github.com/xiangzhou/GEMMA/blob/3ed15d7061fdac57c07d
 
 ### `CalcHiQi`
 
+`CalcHiQi` is defined [here](https://github.com/xiangzhou/GEMMA/blob/898770748aa87ad89a5ca10282141fae7f4cbbd5/src/mvlmm.cpp#L961-L1022) in GEMMA.
+
+```{r}
+CalcHiQi <- function(){
+  n_size <- length(eval)
+  c_size <- nrow(X)
+  d_size <- nrow(V_g)
+  ep_out <- eigen_proc(V_g, V_e) # I defined eigen_proc() in my earlier blog post from may 24, 2017
+  ep_out[[1]] -> logdet_Ve
+  ep_out[[2]] -> UltVeh
+  ep_out[[3]] -> UltVehi
+  ep_out[[4]] -> D_l
+  logdet_H <- n_size * logdet_Ve
+  for (k in 1:n_size){
+    #delta=gsl_vector_get (eval, k);
+    delta <- eval[k]
+    #gsl_matrix_memcpy (mat_dd, UltVehi);
+    mat_dd <- UltVehi
+    #for(size_t i=0; i<d_size; i++) {
+		for (i in 1:d_size){
+    	#dl=gsl_vector_get(D_l, i);
+      dl <- D_l[i]
+    	#d=delta*dl+1.0;
+      d <- delta * dl + 1
+			#gsl_vector_view mat_row=gsl_matrix_row (mat_dd, i);
+			mat_row <- mat_dd[i, ]
+      #gsl_vector_scale (&mat_row.vector, 1.0/d);
+      mat_row <- mat_row / d
+      mat_row -> mat_dd[i, ]
+			#logdet_H+=log(d);
+      logdet_H <- logdet_H + log(d)
+		}
+    #gsl_matrix_view Hi_k=gsl_matrix_submatrix(Hi_all, 0, k*d_size, d_size, d_size);
+		Hi_k <- Hi_all[1:d_size, ((k - 1) * d_size + 1):(k * d_size)]
+    #gsl_blas_dgemm(CblasTrans, CblasNoTrans, 1.0, UltVehi, mat_dd, 0.0, &Hi_k.matrix);
+		Hi_k <- t(UltVehi) %*% mat_dd
+		Hi_k -> Hi_all[1:d_size, ((k - 1) * d_size + 1):(k * d_size)]
+  }
+  #logdet_Q=CalcQi (eval, D_l, X, Qi)-(double)c_size*logdet_Ve;
+  cq_out <- calc_qi(eval, D_l, X)
+  cq_out[[1]] -> Qi
+  cq_out[[2]] - c_size * logdet_Ve -> logdet_Q
+  #for (size_t i=0; i<c_size; i++) {
+	for (i in 1:c_size){
+  	#for (size_t j=0; j<c_size; j++) {
+		for (j in 1:c_size){
+	  	#gsl_matrix_view Qi_sub=gsl_matrix_submatrix (Qi, i*d_size, j*d_size, d_size, d_size);
+			Qi_sub <- Qi[((i - 1) * d_size + 1):(i * d_size), ((j - 1) * d_size + 1):(j * d_size)]
+		  #if (j<i) {
+			if (j < i){
+				#gsl_matrix_view Qi_sym=gsl_matrix_submatrix (Qi, j*d_size, i*d_size, d_size, d_size);
+				Qi_sym <- Qi[((j - 1) * d_size + 1):(j * d_size), ((i - 1) * d_size + 1):(i * d_size)]
+			  #gsl_matrix_transpose_memcpy (&Qi_sub.matrix, &Qi_sym.matrix);
+				t(Qi_sym) -> Qi_sub
+				Qi_sub -> Qi[((i - 1) * d_size + 1):(i * d_size), ((j - 1) * d_size + 1):(j * d_size)]
+			#} else {
+			} else {
+				#gsl_blas_dgemm(CblasNoTrans, CblasNoTrans, 1.0, &Qi_sub.matrix, UltVeh, 0.0, mat_dd);
+				mat_dd <- Qi_sub %*% UltVeh
+			  #gsl_blas_dgemm(CblasTrans, CblasNoTrans, 1.0, UltVeh, mat_dd, 0.0, &Qi_sub.matrix);
+				t(UltVeh) %*% mat_dd -> Qi_sub
+				Qi_sub -> Qi[((i - 1) * d_size + 1):(i * d_size), ((j - 1) * d_size + 1):(j * d_size)]
+			}
+		}
+	}
+  return(list(logdet_H, Qi))
+}
+  
+```
+
+**I need to revise the above code in light of what i just learned about matrix (and vector) views.**
+
+
+
 
 ### `Calc_Hiy_all`
 
