@@ -146,12 +146,45 @@ CalcHiQi <- function(){
   
 ```
 
-**I need to revise the above code in light of what i just learned about matrix (and vector) views.**
 
 
 
 
 ### `Calc_Hiy_all`
+
+```{r}
+#void Calc_Hiy_all (const gsl_matrix *Y, const gsl_matrix *Hi_all, gsl_matrix *Hiy_all)
+#{
+Calc_Hiy_all <- function(){
+#	gsl_matrix_set_zero (Hiy_all);
+  
+
+#	size_t n_size=Y->size2, d_size=Y->size1;
+  ncol(Y) -> n_size
+  nrow(Y) -> d_size
+  Hiy_all <- matrix(data = 0, nrow = d_size, ncol = n_size)
+#	for (size_t k=0; k<n_size; k++) {
+  for (k in 1:n_size){
+      #		gsl_matrix_const_view Hi_k=gsl_matrix_const_submatrix(Hi_all, 0, k*d_size, d_size, d_size);
+    Hi_k <- Hi_all[1:d_size, ((k - 1) * d_size):(k * d_size)]
+#		gsl_vector_const_view y_k=gsl_matrix_const_column(Y, k);
+    y_k <- Y[, k]
+#		gsl_vector_view Hiy_k=gsl_matrix_column(Hiy_all, k);
+    Hiy_k <- Hiy_all[, k]
+    
+#		gsl_blas_dgemv (CblasNoTrans, 1.0, &Hi_k.matrix, &y_k.vector, 0.0, &Hiy_k.vector);
+    Hiy_k <- Hi_k + y_k %*% t(y_k)
+    Hi_k -> Hi_all[1:d_size, ((k - 1) * d_size):(k * d_size)]
+    Hiy_k -> Hiy_all[, k]
+#	}
+  }
+#	return;
+#}
+  return(Hiy_all)
+}
+```
+
+
 
 
 ### `Calc_xHi_all`
