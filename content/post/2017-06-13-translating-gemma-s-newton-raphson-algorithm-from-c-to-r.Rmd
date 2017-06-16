@@ -687,14 +687,282 @@ Calc_xHiDHiDHiy_all <- function(v_size, eval, Hi, xHi, Hiy){
 
 ### `Calc_xHiDHiDHix_all`
 
+```{r}
+Calc_xHiDHiDHix_all <- function(v_size, eval, Hi, xHi){
+#   //calculate (xHiDHix) for every pair of i j
+# void Calc_xHiDHiDHix_all (const size_t v_size, const gsl_vector *eval, const gsl_matrix *Hi, const gsl_matrix *xHi, gsl_matrix *xHiDHiDHix_all_gg, gsl_matrix *xHiDHiDHix_all_ee, gsl_matrix *xHiDHiDHix_all_ge)
+# {
+# 	gsl_matrix_set_zero(xHiDHiDHix_all_gg);
+# 	gsl_matrix_set_zero(xHiDHiDHix_all_ee);
+# 	gsl_matrix_set_zero(xHiDHiDHix_all_ge);
+# 
+  
+# 	size_t d_size=xHi->size2/eval->size, dc_size=xHi->size1;
+# 	size_t v1, v2;
+# 
+  d_size <- ncol(xHi) / length(eva)
+  dc_size <- nrow(xHi)
+  
+# 	for (size_t i1=0; i1<d_size; i1++) {
+  for (i1 in 1:d_size){
+# 		for (size_t j1=0; j1<d_size; j1++) {
+    for (j1 in 1:d_size){
+
+    # 			if (j1<i1) {continue;}
+      if (i1 <= j1){
+# 			v1=GetIndex(i1, j1, d_size);
+# 
+# 			for (size_t i2=0; i2<d_size; i2++) {
+        for (i2 in 1:d_size){
+          
+        
+# 				for (size_t j2=0; j2<d_size; j2++) {
+          for (j2 in 1:d_size){
+# 			
+          #if (j2<i2) {continue;}
+ 				
+            if (i2 <= j2){
+            #v2=GetIndex(i2, j2, d_size);
+              v2 <- GetIndex(i2, j2, d_size)
+# 
+# 					if (v2<v1) {continue;}
+              if (!(v2 < v1)){
+# 
+# 					gsl_matrix_view xHiDHiDHix_gg1=gsl_matrix_submatrix (xHiDHiDHix_all_gg, 0, (v1*v_size+v2)*dc_size, dc_size, dc_size);
+                xHiDHiDHix_gg1 <- xHiDHiDHix_all_gg[1:dc_size, (((v1 - 1) * v_size + v2 - 1) * dc_size + 1):(((v1 - 1) * v_size + v2 - 1) * dc_size)]
+                                
+# 					gsl_matrix_view xHiDHiDHix_ee1=gsl_matrix_submatrix (xHiDHiDHix_all_ee, 0, (v1*v_size+v2)*dc_size, dc_size, dc_size);
+                xHiDHiDHix_ee1 <- xHiDHiDHix_all_ee[1:dc_size, (((v1 - 1) * v_size + v2 - 1) * dc_size + 1):(((v1 - 1) * v_size + v2 - 1) * dc_size)]
+                                
+# 					gsl_matrix_view xHiDHiDHix_ge1=gsl_matrix_submatrix (xHiDHiDHix_all_ge, 0, (v1*v_size+v2)*dc_size, dc_size, dc_size);
+                xHiDHiDHix_ge1 <- xHiDHiDHix_all_ge[1:dc_size, (((v1 - 1) * v_size + v2 - 1) * dc_size + 1):(((v1 - 1) * v_size + v2 - 1) * dc_size)]
+                                
+# 
+# 					Calc_xHiDHiDHix (eval, Hi, xHi, i1, j1, i2, j2, &xHiDHiDHix_gg1.matrix, &xHiDHiDHix_ee1.matrix, &xHiDHiDHix_ge1.matrix);
+                cx_out <- Calc_xHiDHiDHix() # ADD ARGUMENTS!
+# 
+# 					if (v2!=v1) {
+                if (v2 != v1){
+                  xHiDHiDHix_gg2 <- xHiDHiDHix_all_gg[1:dc_size, (((v2 - 1)* v_size + v1 - 1) * dc_size + 1):(((v2 - 1)* v_size + v1) * dc_size)]
+                  xHiDHiDHix_ee2 <- xHiDHiDHix_all_ee[1:dc_size, (((v2 - 1)* v_size + v1 - 1) * dc_size + 1):(((v2 - 1)* v_size + v1) * dc_size)]
+                  xHiDHiDHix_ge2 <- xHiDHiDHix_all_ge[1:dc_size, (((v2 - 1)* v_size + v1 - 1) * dc_size + 1):(((v2 - 1)* v_size + v1) * dc_size)]
+                  
+                  xHiDHiDHix_gg2 <- xHiDHiDHix_gg1
+                  xHiDHiDHix_ee2 <- xHiDHiDHix_ee1
+                  xHiDHiDHix_ge2 <- xHiDHiDHix_ge1
+                  
+                  xHiDHiDHix_gg2 -> xHiDHiDHix_all_gg[1:dc_size, (((v2 - 1)* v_size + v1 - 1) * dc_size + 1):(((v2 - 1)* v_size + v1) * dc_size)]
+                  xHiDHiDHix_ee2 -> xHiDHiDHix_all_ee[1:dc_size, (((v2 - 1)* v_size + v1 - 1) * dc_size + 1):(((v2 - 1)* v_size + v1) * dc_size)]
+                  xHiDHiDHix_ge2 -> xHiDHiDHix_all_ge[1:dc_size, (((v2 - 1)* v_size + v1 - 1) * dc_size + 1):(((v2 - 1)* v_size + v1) * dc_size)]
+                  
+                }
+# 						gsl_matrix_view xHiDHiDHix_gg2=gsl_matrix_submatrix (xHiDHiDHix_all_gg, 0, (v2*v_size+v1)*dc_size, dc_size, dc_size);
+# 						gsl_matrix_view xHiDHiDHix_ee2=gsl_matrix_submatrix (xHiDHiDHix_all_ee, 0, (v2*v_size+v1)*dc_size, dc_size, dc_size);
+# 						gsl_matrix_view xHiDHiDHix_ge2=gsl_matrix_submatrix (xHiDHiDHix_all_ge, 0, (v2*v_size+v1)*dc_size, dc_size, dc_size);
+# 
+# 						gsl_matrix_memcpy (&xHiDHiDHix_gg2.matrix, &xHiDHiDHix_gg1.matrix);
+# 						gsl_matrix_memcpy (&xHiDHiDHix_ee2.matrix, &xHiDHiDHix_ee1.matrix);
+# 						gsl_matrix_memcpy (&xHiDHiDHix_ge2.matrix, &xHiDHiDHix_ge1.matrix);
+# 					}
+                xHiDHiDHix_gg1 -> xHiDHiDHix_all_gg[1:dc_size, (((v1 - 1) * v_size + v2 - 1) * dc_size + 1):(((v1 - 1) * v_size + v2 - 1) * dc_size)]
+                xHiDHiDHix_ee1 -> xHiDHiDHix_all_ee[1:dc_size, (((v1 - 1) * v_size + v2 - 1) * dc_size + 1):(((v1 - 1) * v_size + v2 - 1) * dc_size)]
+                xHiDHiDHix_ge1 -> xHiDHiDHix_all_ge[1:dc_size, (((v1 - 1) * v_size + v2 - 1) * dc_size + 1):(((v1 - 1) * v_size + v2 - 1) * dc_size)]
+              }
+            }
+          }
+        }
+# 				}
+# 			}
+# 		}
+# 	}
+#	return;
+      } # end if (i1 < j1)
+    } # end for loop over j1
+  } # end for loop over i1
+  return(list(xHiDHiDHix_all_gg, xHiDHiDHix_all_ee, xHiDHiDHix_all_ge))
+}
+```
+
+
+
+
+
 
 ### `Calc_QiVec_all`
+
+```{r}
+Calc_QiVec_all <- function(Qi, vec_all_g, vec_all_e){
+#   //calculate Qi(xHiDHiy) and Qi(xHiDHix)Qi(xHiy) for each pair of i j (i<=j)
+# void Calc_QiVec_all (const gsl_matrix *Qi, const gsl_matrix *vec_all_g, const gsl_matrix *vec_all_e, gsl_matrix *Qivec_all_g, gsl_matrix *Qivec_all_e)
+# {
+# 	for (size_t i=0; i<vec_all_g->size2; i++) {
+  for (i in 1:ncol(vec_all_g)){
+# 		gsl_vector_const_view vec_g=gsl_matrix_const_column (vec_all_g, i);
+    vec_g <- vec_all_g[, i]
+    vec_e <- vec_all_e[, i]
+
+    # 		gsl_vector_const_view vec_e=gsl_matrix_const_column (vec_all_e, i);
+# 
+# 		gsl_vector_view Qivec_g=gsl_matrix_column (Qivec_all_g, i);
+    Qivec_g <- Qivec_all_g[, i]
+# 		gsl_vector_view Qivec_e=gsl_matrix_column (Qivec_all_e, i);
+    Qivec_e <- Qivec_all_e[, i]
+
+    # 
+# 		gsl_blas_dgemv (CblasNoTrans, 1.0, Qi, &vec_g.vector, 0.0, &Qivec_g.vector);
+    Qivec_g <- Qi %*% vec_g
+    Qivec_e <- Qi %*% vec_e
+# 		gsl_blas_dgemv (CblasNoTrans, 1.0, Qi, &vec_e.vector, 0.0, &Qivec_e.vector);
+# 	}
+# 
+# 	return;
+# }
+    vec_g -> vec_all_g[, i]
+    vec_e -> vec_all_e[, i]
+    Qivec_g -> Qivec_all_g[, i]
+    Qivec_e -> Qivec_all_e[, i]
+  }
+  return(list(Qivec_all_g, Qivec_all_e))
+}
+```
 
 
 ### `Calc_QiMat_all`
 
+```{r}
+# //calculate Qi(xHiDHix) for each pair of i j (i<=j)
+# void Calc_QiMat_all (const gsl_matrix *Qi, const gsl_matrix *mat_all_g, const gsl_matrix *mat_all_e, gsl_matrix *Qimat_all_g, gsl_matrix *Qimat_all_e)
+# {
+Calc_QiMat_all <- function(Qi, mat_all_g, mat_all_e){
+  dc_size <- nrow(Qi)
+  v_size <- ncol(mat_all_g) / nrow(mat_all_g)
+# 	size_t dc_size=Qi->size1;
+# 	size_t v_size=mat_all_g->size2/mat_all_g->size1;
+# 
+# 	for (size_t i=0; i<v_size; i++) {
+  for (i in 1:v_size){
+    mat_g <- mat_all_g[1:dc_size, ((i - 1) * dc_size + 1):(i * dc_size)]
+  # 		gsl_matrix_const_view mat_g=gsl_matrix_const_submatrix (mat_all_g, 0, i*dc_size, dc_size, dc_size);
+# 		gsl_matrix_const_view mat_e=gsl_matrix_const_submatrix (mat_all_e, 0, i*dc_size, dc_size, dc_size);
+    mat_e <- mat_all_e[1:dc_size, ((i - 1) * dc_size + 1):(i * dc_size)]
+
+    # 
+# 		gsl_matrix_view Qimat_g=gsl_matrix_submatrix (Qimat_all_g, 0, i*dc_size, dc_size, dc_size);
+    Qimat_g <- Qimat_all_g[1:dc_size, ((i - 1) * dc_size + 1):(i * dc_size)]
+# 		gsl_matrix_view Qimat_e=gsl_matrix_submatrix (Qimat_all_e, 0, i*dc_size, dc_size, dc_size);
+    Qimat_e <- Qimat_all_e[1:dc_size, ((i - 1) * dc_size + 1):(i * dc_size)]
+
+    # 
+# 		gsl_blas_dgemm (CblasNoTrans, CblasNoTrans, 1.0, Qi, &mat_g.matrix, 0.0, &Qimat_g.matrix);
+    Qimat_g <- Qi %*% mat_g 
+# 		gsl_blas_dgemm (CblasNoTrans, CblasNoTrans, 1.0, Qi, &mat_e.matrix, 0.0, &Qimat_e.matrix);
+    Qimat_e <- Qi %*% mat_e
+# 	}
+    
+    mat_g -> mat_all_g[1:dc_size, ((i - 1) * dc_size + 1):(i * dc_size)]
+    mat_e -> mat_all_e[1:dc_size, ((i - 1) * dc_size + 1):(i * dc_size)]
+    Qimat_g -> Qimat_all_g[1:dc_size, ((i - 1) * dc_size + 1):(i * dc_size)]
+    Qimat_e -> Qimat_all_e[1:dc_size, ((i - 1) * dc_size + 1):(i * dc_size)]
+    # 
+# 	return;
+# }
+  }
+  return(list(Qimat_all_g, Qimat_all_e))
+}
+```
+
+
+
+
+
+
+
 ### `GetIndex`
+
+```{r}
+# //0<=i,j<d_size
+# size_t GetIndex (const size_t i, const size_t j, const size_t d_size)
+# {
+GetIndex <- function(i, j, d_size){
+# 	if (i>=d_size || j>=d_size) {cout<<"error in GetIndex."<<endl; return 0;}
+  if (i >= d_size | j >= d_size) return("error")
+
+  # 
+# 	size_t s, l;
+# 	if (j<i) {s=j; l=i;} else {s=i; l=j;}
+# 
+  if (j < i){
+    s <- j
+    l <- i
+  } else {
+    s <- i
+    l <- j
+  }
+# 	return (2*d_size-s+1)*s/2+l-s;
+  return((2 * d_size - s + 1) * s / 2 + l - s)
+# }
+}
+```
 
 
 ### `Calc_xHiDHiy`
+
+```{r}
+Calc_xHiDHiy <- function(eval, xHi, Hiy, i, j){
+#   void Calc_xHiDHiy (const gsl_vector *eval, const gsl_matrix *xHi, const gsl_matrix *Hiy, const size_t i, const size_t j, gsl_vector *xHiDHiy_g, gsl_vector *xHiDHiy_e)
+# {
+# 	gsl_vector_set_zero(xHiDHiy_g);
+# 	gsl_vector_set_zero(xHiDHiy_e);
+  
+# 	size_t n_size=eval->size, d_size=Hiy->size1;
+  n_size <- length(eval)
+  d_size <- nrow(Hiy)
+  xHiDHiy_g <- numeric(length = d_size)
+  xHiDHiy_e <- numeric(length = d_size)
+# 
+# 	double delta, d;
+# 
+# 	for (size_t k=0; k<n_size; k++) {
+  for (k in 1:n_size){
+# 		delta=gsl_vector_get (eval, k);
+    delta <- eval[k]
+# 
+# 		gsl_vector_const_view xHi_col_i=gsl_matrix_const_column (xHi, k*d_size+i);
+    xHi_col_i <- xHi[, k * d_size + i] #VERIFY INDEX HERE!
+# 		d=gsl_matrix_get (Hiy, j, k);
+# 
+    d <- Hiy[j, k] # VERIFY INDEX HERE!
+# 		gsl_blas_daxpy (d*delta, &xHi_col_i.vector, xHiDHiy_g);
+    xHiDHiy_g <- xHiDHiy_g + d * delta * xHi_col_i
+# 		gsl_blas_daxpy (d, &xHi_col_i.vector, xHiDHiy_e);
+    xHiDHiy_e <- xHiDHiy_e + d * xHi_col_i
+# 
+# 		if (i!=j) {
+    if ( i != j){
+      
+    
+# 			gsl_vector_const_view xHi_col_j=gsl_matrix_const_column (xHi, k*d_size+j);
+      xHi_col_j <- xHi[ , (k - 1) * d_size + j]
+# 			d=gsl_matrix_get (Hiy, i, k);
+      d <- Hiy[i, k]
+# 
+# 			gsl_blas_daxpy (d*delta, &xHi_col_j.vector, xHiDHiy_g);
+      xHiDHiy_g <- xhiDHiy_g + d * delta * xHi_col_j
+# 			gsl_blas_daxpy (d, &xHi_col_j.vector, xHiDHiy_e);
+      xHiDHiy_e <- xhiDHiy_e + d * xHi_col_j
+# 		
+# 		}
+# 	}
+# 
+# 	return;
+# }
+    }
+  }
+  return(list(xHiDHiy_g, xHiDHiy_e))
+}
+```
+
+
+
+
 
