@@ -911,6 +911,275 @@ MphEM <- function(func_name = "R", max_iter = 10000, max_prec = 1 / 1000, eval, 
 }
 ```
 
+### R code for MphInitial
+
+```{r}
+# void MphInitial(const size_t em_iter, const double em_prec, const size_t nr_iter, const double nr_prec, const gsl_vector *eval, const gsl_matrix *X, const gsl_matrix *Y, const double l_min, const double l_max, const size_t n_region, gsl_matrix *V_g, gsl_matrix *V_e, gsl_matrix *B)
+# {
+MphInitial <- function(em_iter, em_prec, nr_iter, nr_prec, eval, X, Y, l_min, l_max, n_region){
+  n_size <- length(eval)
+  c_size <- nrow(X)
+  d_size <- nrow(Y)
+  V_g <- matrix(data = 0, nrow = d_size, ncol = d_size)
+  V_e <- V_g
+  B <- matrix(data = 0, nrow = c_size, ncol = d_size)
+  # 	gsl_matrix_set_zero (V_g);
+# 	gsl_matrix_set_zero (V_e);
+# 	gsl_matrix_set_zero (B);
+# 
+# 	size_t n_size=eval->size, c_size=X->size1, d_size=Y->size1;
+# 	double a, b, c;
+# 	double lambda, logl, vg, ve;
+# 
+# 	//Initial the diagonal elements of Vg and Ve using univariate LMM and REML estimates
+# 	gsl_matrix *Xt=gsl_matrix_alloc (n_size, c_size);
+  Xt <- matrix(nrow = n_size, ncol = c_size)
+# 	gsl_vector *beta_temp=gsl_vector_alloc(c_size);
+  beta_temp <- numeric(length = c_size)
+# 	gsl_vector *se_beta_temp=gsl_vector_alloc(c_size);
+  se_beta_temp <- numeric(length = c_size)
+
+  # 
+# 	gsl_matrix_transpose_memcpy (Xt, X);
+  t(X) -> Xt
+# 
+# 	for (size_t i=0; i<d_size; i++) {
+  for (i in 1:d_size){
+    Y_row <- Y[i, ] # matrix view used here!
+# 		gsl_vector_const_view Y_row=gsl_matrix_const_row (Y, i);
+# 		CalcLambda ('R', eval, Xt, &Y_row.vector, l_min, l_max, n_region, lambda, logl);
+    cl_out <- CalcLambda(eval, Xt, Y_row)
+    cl_out[[1]] -> lambda
+    cl_out[[2]] -> vg
+    cl_out[[3]] -> ve
+    cl_out[[4]] -> beta_temp
+    cl_out[[5]] -> se_beta_temp
+# 		CalcLmmVgVeBeta (eval, Xt, &Y_row.vector, lambda, vg, ve, beta_temp, se_beta_temp);
+    cl_out <- CalcLmmVgVeBeta(eval, Xt, Y_row, lambda, vg, ve, beta_temp, se_beta_temp)
+# 
+# 		gsl_matrix_set(V_g, i, i, vg);
+    V_g[i, i] <- vg
+# 		gsl_matrix_set(V_e, i, i, ve);
+    V_e[i, i] <- ve
+  }
+# 	}
+# 
+# 	gsl_matrix_free (Xt);
+# 	gsl_vector_free (beta_temp);
+# 	gsl_vector_free (se_beta_temp);
+# 
+# 	//if number of phenotypes is above four, then obtain the off diagonal elements with two trait models
+# 	if (d_size>4) {
+# 		//first obtain good initial values
+# 		//large matrices for EM
+# 		gsl_matrix *U_hat=gsl_matrix_alloc (2, n_size);
+# 		gsl_matrix *E_hat=gsl_matrix_alloc (2, n_size);
+# 		gsl_matrix *OmegaU=gsl_matrix_alloc (2, n_size);
+# 		gsl_matrix *OmegaE=gsl_matrix_alloc (2, n_size);
+# 		gsl_matrix *UltVehiY=gsl_matrix_alloc (2, n_size);
+# 		gsl_matrix *UltVehiBX=gsl_matrix_alloc (2, n_size);
+# 		gsl_matrix *UltVehiU=gsl_matrix_alloc (2, n_size);
+# 		gsl_matrix *UltVehiE=gsl_matrix_alloc (2, n_size);
+# 
+# 		//large matrices for NR
+# 		gsl_matrix *Hi_all=gsl_matrix_alloc (2, 2*n_size);		//each dxd block is H_k^{-1}
+# 		gsl_matrix *Hiy_all=gsl_matrix_alloc (2, n_size);				//each column is H_k^{-1}y_k
+# 		gsl_matrix *xHi_all=gsl_matrix_alloc (2*c_size, 2*n_size);		//each dcxdc block is x_k\otimes H_k^{-1}
+# 		gsl_matrix *Hessian=gsl_matrix_alloc (6, 6);
+# 
+# 		//2 by n matrix of Y
+# 		gsl_matrix *Y_sub=gsl_matrix_alloc (2, n_size);
+# 		gsl_matrix *Vg_sub=gsl_matrix_alloc (2, 2);
+# 		gsl_matrix *Ve_sub=gsl_matrix_alloc (2, 2);
+# 		gsl_matrix *B_sub=gsl_matrix_alloc (2, c_size);
+# 
+# 		for (size_t i=0; i<d_size; i++) {
+# 			gsl_vector_view Y_sub1=gsl_matrix_row (Y_sub, 0);
+# 			gsl_vector_const_view Y_1=gsl_matrix_const_row (Y, i);
+# 			gsl_vector_memcpy (&Y_sub1.vector, &Y_1.vector);
+# 
+# 			for (size_t j=i+1; j<d_size; j++) {
+# 				gsl_vector_view Y_sub2=gsl_matrix_row (Y_sub, 1);
+# 				gsl_vector_const_view Y_2=gsl_matrix_const_row (Y, j);
+# 				gsl_vector_memcpy (&Y_sub2.vector, &Y_2.vector);
+# 
+# 				gsl_matrix_set_zero (Vg_sub);
+# 				gsl_matrix_set_zero (Ve_sub);
+# 				gsl_matrix_set (Vg_sub, 0, 0, gsl_matrix_get (V_g, i, i));
+# 				gsl_matrix_set (Ve_sub, 0, 0, gsl_matrix_get (V_e, i, i));
+# 				gsl_matrix_set (Vg_sub, 1, 1, gsl_matrix_get (V_g, j, j));
+# 				gsl_matrix_set (Ve_sub, 1, 1, gsl_matrix_get (V_e, j, j));
+# 
+# 				logl=MphEM ('R', em_iter, em_prec, eval, X, Y_sub, U_hat, E_hat, OmegaU, OmegaE, UltVehiY, UltVehiBX, UltVehiU, UltVehiE, Vg_sub, Ve_sub, B_sub);
+# 				logl=MphNR ('R', nr_iter, nr_prec, eval, X, Y_sub, Hi_all, xHi_all, Hiy_all, Vg_sub, Ve_sub, Hessian, a, b, c);
+# 
+# 				gsl_matrix_set(V_g, i, j, gsl_matrix_get (Vg_sub, 0, 1));
+# 				gsl_matrix_set(V_g, j, i, gsl_matrix_get (Vg_sub, 0, 1));
+# 
+# 				gsl_matrix_set(V_e, i, j, ve=gsl_matrix_get (Ve_sub, 0, 1));
+# 				gsl_matrix_set(V_e, j, i, ve=gsl_matrix_get (Ve_sub, 0, 1));
+# 			}
+# 		}
+# 
+# 		//free matrices
+# 		gsl_matrix_free(U_hat);
+# 		gsl_matrix_free(E_hat);
+# 		gsl_matrix_free(OmegaU);
+# 		gsl_matrix_free(OmegaE);
+# 		gsl_matrix_free(UltVehiY);
+# 		gsl_matrix_free(UltVehiBX);
+# 		gsl_matrix_free(UltVehiU);
+# 		gsl_matrix_free(UltVehiE);
+# 
+# 		gsl_matrix_free(Hi_all);
+# 		gsl_matrix_free(Hiy_all);
+# 		gsl_matrix_free(xHi_all);
+# 		gsl_matrix_free(Hessian);
+# 
+# 		gsl_matrix_free(Y_sub);
+# 		gsl_matrix_free(Vg_sub);
+# 		gsl_matrix_free(Ve_sub);
+# 		gsl_matrix_free(B_sub);
+# 
+# 		/*
+# 		//second, maximize a increasingly large matrix
+# 		for (size_t i=1; i<d_size; i++) {
+# 			//large matrices for EM
+# 			gsl_matrix *U_hat=gsl_matrix_alloc (i+1, n_size);
+# 			gsl_matrix *E_hat=gsl_matrix_alloc (i+1, n_size);
+# 			gsl_matrix *OmegaU=gsl_matrix_alloc (i+1, n_size);
+# 			gsl_matrix *OmegaE=gsl_matrix_alloc (i+1, n_size);
+# 			gsl_matrix *UltVehiY=gsl_matrix_alloc (i+1, n_size);
+# 			gsl_matrix *UltVehiBX=gsl_matrix_alloc (i+1, n_size);
+# 			gsl_matrix *UltVehiU=gsl_matrix_alloc (i+1, n_size);
+# 			gsl_matrix *UltVehiE=gsl_matrix_alloc (i+1, n_size);
+# 			//large matrices for NR
+# 			gsl_matrix *Hi_all=gsl_matrix_alloc (i+1, (i+1)*n_size);		//each dxd block is H_k^{-1}
+# 			gsl_matrix *Hiy_all=gsl_matrix_alloc (i+1, n_size);				//each column is H_k^{-1}y_k
+# 			gsl_matrix *xHi_all=gsl_matrix_alloc ((i+1)*c_size, (i+1)*n_size);		//each dcxdc block is x_k\otimes H_k^{-1}
+# 			gsl_matrix *Hessian=gsl_matrix_alloc ((i+1)*(i+2), (i+1)*(i+2));
+# 			//(i+1) by n matrix of Y
+# 			gsl_matrix *Y_sub=gsl_matrix_alloc (i+1, n_size);
+# 			gsl_matrix *Vg_sub=gsl_matrix_alloc (i+1, i+1);
+# 			gsl_matrix *Ve_sub=gsl_matrix_alloc (i+1, i+1);
+# 			gsl_matrix *B_sub=gsl_matrix_alloc (i+1, c_size);
+# 			gsl_matrix_const_view Y_sub_view=gsl_matrix_const_submatrix (Y, 0, 0, i+1, n_size);
+# 			gsl_matrix_view Vg_sub_view=gsl_matrix_submatrix (V_g, 0, 0, i+1, i+1);
+# 			gsl_matrix_view Ve_sub_view=gsl_matrix_submatrix (V_e, 0, 0, i+1, i+1);
+# 			gsl_matrix_memcpy (Y_sub, &Y_sub_view.matrix);
+# 			gsl_matrix_memcpy (Vg_sub, &Vg_sub_view.matrix);
+# 			gsl_matrix_memcpy (Ve_sub, &Ve_sub_view.matrix);
+# 			logl=MphEM ('R', em_iter, em_prec, eval, X, Y_sub, U_hat, E_hat, OmegaU, OmegaE, UltVehiY, UltVehiBX, UltVehiU, UltVehiE, Vg_sub, Ve_sub, B_sub);
+# 			logl=MphNR ('R', nr_iter, nr_prec, eval, X, Y_sub, Hi_all, xHi_all, Hiy_all, Vg_sub, Ve_sub, Hessian, crt_a, crt_b, crt_c);
+# 			gsl_matrix_memcpy (&Vg_sub_view.matrix, Vg_sub);
+# 			gsl_matrix_memcpy (&Ve_sub_view.matrix, Ve_sub);
+# 			//free matrices
+# 			gsl_matrix_free(U_hat);
+# 			gsl_matrix_free(E_hat);
+# 			gsl_matrix_free(OmegaU);
+# 			gsl_matrix_free(OmegaE);
+# 			gsl_matrix_free(UltVehiY);
+# 			gsl_matrix_free(UltVehiBX);
+# 			gsl_matrix_free(UltVehiU);
+# 			gsl_matrix_free(UltVehiE);
+# 			gsl_matrix_free(Hi_all);
+# 			gsl_matrix_free(Hiy_all);
+# 			gsl_matrix_free(xHi_all);
+# 			gsl_matrix_free(Hessian);
+# 			gsl_matrix_free(Y_sub);
+# 			gsl_matrix_free(Vg_sub);
+# 			gsl_matrix_free(Ve_sub);
+# 			gsl_matrix_free(B_sub);
+# 		}
+# 		 */
+# 	}
+# 
+# 	//calculate B hat using GSL estimate
+# 	gsl_matrix *UltVehiY=gsl_matrix_alloc (d_size, n_size);
+  UltVehiY <- matrix(nrow = d_size, ncol = n_size)
+# 
+# 	gsl_vector *D_l=gsl_vector_alloc (d_size);
+  D_l <- matrix(nrow = d_size, ncol = d_size)
+# 	gsl_matrix *UltVeh=gsl_matrix_alloc (d_size, d_size);
+  UltVeh <- matrix(nrow = d_size, ncol = d_size)
+# 	gsl_matrix *UltVehi=gsl_matrix_alloc (d_size, d_size);
+  UltVehi <- matrix(nrow = d_size, ncol = d_size)
+# 	gsl_matrix *Qi=gsl_matrix_alloc (d_size*c_size, d_size*c_size);
+  Qi <- matrix(nrow = d_size * c_size, ncol = d_size * c_size)
+# 	gsl_vector *XHiy=gsl_vector_alloc (d_size*c_size);
+  XHiy <- numeric(length = d_size * c_size)
+# 	gsl_vector *beta=gsl_vector_alloc (d_size*c_size);
+  beta <- numeric(length = d_size * c_size)
+# 
+# 	gsl_vector_set_zero (XHiy);
+  
+# 
+# 	double logdet_Ve, logdet_Q, dl, d, delta, dx, dy;
+# 
+# 	//eigen decomposition and calculate log|Ve|
+# 	logdet_Ve=EigenProc (V_g, V_e, D_l, UltVeh, UltVehi);
+  ep_out <- eigen_proc(V_g, V_e)
+  # logdet_Ve, UltVeh, UltVehi, Dl
+  ep_out[[1]] -> logdet_Ve
+  ep_out[[2]] -> UltVeh
+  ep_out[[3]] -> UltVehi
+  ep_out[[4]] -> D_l
+# 
+# 	//calculate Qi and log|Q|
+# 	logdet_Q=CalcQi (eval, D_l, X, Qi);
+  cq_out <- calc_qi(eval = eval, D_l = D_l, X = X)
+  cq_out[[1]] -> Qi
+  cq_out[[2]] -> logdet_Q
+# 
+# 	//calculate UltVehiY
+# 	gsl_blas_dgemm(CblasNoTrans, CblasNoTrans, 1.0, UltVehi, Y, 0.0, UltVehiY);
+  UltVehiY <- UltVehi %*% Y
+# 
+# 	//calculate XHiy
+# 	for (size_t i=0; i<d_size; i++) {
+# 		dl=gsl_vector_get(D_l, i);
+# 
+# 		for (size_t j=0; j<c_size; j++) {
+# 			d=0.0;
+# 			for (size_t k=0; k<n_size; k++) {
+# 				delta=gsl_vector_get(eval, k);
+# 				dx=gsl_matrix_get(X, j, k);
+# 				dy=gsl_matrix_get(UltVehiY, i, k);
+# 
+# 				//if (delta==0) {continue;}
+# 				d+=dy*dx/(delta*dl+1.0);
+# 			}
+# 			gsl_vector_set(XHiy, j*d_size+i, d);
+# 		}
+# 	}
+# 
+# 	gsl_blas_dgemv(CblasNoTrans, 1.0, Qi, XHiy, 0.0, beta);
+# 
+# 	//multiply beta by UltVeh and save to B
+# 	for (size_t i=0; i<c_size; i++) {
+# 		gsl_vector_view B_col=gsl_matrix_column (B, i);
+# 		gsl_vector_view beta_sub=gsl_vector_subvector (beta, i*d_size, d_size);
+# 		gsl_blas_dgemv(CblasTrans, 1.0, UltVeh, &beta_sub.vector, 0.0, &B_col.vector);
+# 	}
+# 
+# 	//free memory
+# 	gsl_matrix_free(UltVehiY);
+# 
+# 	gsl_vector_free(D_l);
+# 	gsl_matrix_free(UltVeh);
+# 	gsl_matrix_free(UltVehi);
+# 	gsl_matrix_free(Qi);
+# 	gsl_vector_free(XHiy);
+# 	gsl_vector_free(beta);
+# 
+# 	return;
+# }
+
+```
+
+
+
+
 ## Running `MphEM()` with real data
 
 First, we read in the GEMMA example data.
@@ -930,10 +1199,27 @@ relatedness <- read_delim("~/GEMMA/example/output/mouse_hs1940.cXX.txt", delim =
   as.matrix()
 # decompose the relatedness matrix
 eigen(relatedness) -> eigen_out
+eigen_out$vectors -> U
+eigen_out$values -> eval
+```
 
+```{r}
+as.numeric(geno[1, 4:1943]) -> genotilde
+
+Xtilde <- rbind(1, genotilde) %>% as.matrix()
+X <- Xtilde %*% U
+```
+
+```{r}
+Ytilde <- t(pheno[, c(2, 6)])
+Y <- Ytilde %*% U
 ```
 
 
 
+
+```{r}
+MphEM(func_name = "R", max_iter = 10, max_prec = 0.001, eval = eval, X = X, Y = Y)
+```
 
 

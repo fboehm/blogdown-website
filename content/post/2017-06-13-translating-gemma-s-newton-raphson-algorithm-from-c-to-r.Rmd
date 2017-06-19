@@ -24,7 +24,9 @@ We want to translate GEMMA's C++ code in the function `MphNR` (in the file `mvlm
 ### R code for `MphNR`
 
 ```{r}
-MphNR <- function(){
+#double MphNR (const char func_name, const size_t max_iter, const double max_prec, const gsl_vector *eval, const gsl_matrix *X, const gsl_matrix *Y, gsl_matrix *Hi_all, gsl_matrix *xHi_all, gsl_matrix *Hiy_all, gsl_matrix *V_g, gsl_matrix *V_e, gsl_matrix *Hessian_inv, double &crt_a, double &crt_b, double &crt_c)
+#{
+MphNR <- function(func_name = "R", max_iter, max_prec, eval, X, Y, Hi_all, xHi_all, Hiy_all, V_g, V_e){
   n_size <- length(eval)
   c_size <- nrow(X)
   d_size <- nrow(Y)
@@ -63,9 +65,15 @@ MphNR <- function(){
 				break
       }
     logl_old <- logl_new
-    CalcDev()
+    foo <- CalcDev(func_name = "R", eval, Qi, Hi, xHi, Hiy, QixHiy) ## FIX HERE
+    foo[[1]] -> Hessian_inv
+    foo[[2]] -> gradient
     }
   } # end of loop over t
+#   //mutiply Hessian_inv with -1.0
+# 	//now Hessian_inv is the variance matrix
+# 	gsl_matrix_scale (Hessian_inv, -1.0);
+  
   return(logl_new)
 } # end of function
 ```
@@ -79,7 +87,7 @@ The [do-while loop](https://github.com/xiangzhou/GEMMA/blob/3ed15d7061fdac57c07d
 `CalcHiQi` is defined [here](https://github.com/xiangzhou/GEMMA/blob/898770748aa87ad89a5ca10282141fae7f4cbbd5/src/mvlmm.cpp#L961-L1022) in GEMMA.
 
 ```{r}
-CalcHiQi <- function(){
+CalcHiQi <- function(eval, X, V_g, V_e){
   n_size <- length(eval)
   c_size <- nrow(X)
   d_size <- nrow(V_g)
@@ -155,7 +163,7 @@ CalcHiQi <- function(){
 ```{r}
 #void Calc_Hiy_all (const gsl_matrix *Y, const gsl_matrix *Hi_all, gsl_matrix *Hiy_all)
 #{
-Calc_Hiy_all <- function(){
+Calc_Hiy_all <- function(Y, Hi_all){
 #	gsl_matrix_set_zero (Hiy_all);
   
 
@@ -325,176 +333,273 @@ CalcDev <- function(func_name = "R", eval, Qi, Hi, xHi, Hiy, QixHiy){
 	#double dev1_g, dev1_e, dev2_gg, dev2_ee, dev2_ge;
 
 	#gsl_matrix *Hessian=gsl_matrix_alloc (v_size*2, v_size*2);
-
+  Hessian <- matrix(nrow = v_size * 2, ncol = v_size * 2)
 	#gsl_matrix *xHiDHiy_all_g=gsl_matrix_alloc (dc_size, v_size);
+  xHiDHiy_ll_g <- matrix(nrow = dc_size, ncol = v_size)
 	#gsl_matrix *xHiDHiy_all_e=gsl_matrix_alloc (dc_size, v_size);
+  xHiDHiy_all_e <- matrix(nrow = dc_size, ncol = v_size)
 	#gsl_matrix *xHiDHix_all_g=gsl_matrix_alloc (dc_size, v_size*dc_size);
+  xHiDHix_all_g <- matrix(nrow = dc_size, ncol = v_size * dc_size)
 	#gsl_matrix *xHiDHix_all_e=gsl_matrix_alloc (dc_size, v_size*dc_size);
+  xHiDHix_all_e <- matrix(nrow = dc_size, ncol = v_size * dc_size)
 	#gsl_matrix *xHiDHixQixHiy_all_g=gsl_matrix_alloc (dc_size, v_size);
+  xHiDHixQixHiy_all_g <- matrix(nrow = dc_size, ncol = v_size)
 	#gsl_matrix *xHiDHixQixHiy_all_e=gsl_matrix_alloc (dc_size, v_size);
+  xHiDHixQixHiy_all_e <- matrix(nrow = dc_size, ncol = v_size)
 
 	#gsl_matrix *QixHiDHiy_all_g=gsl_matrix_alloc (dc_size, v_size);
+  QixHiDHiy_all_g <- matrix(nrow = dc_size, ncol = v_size)
 	#gsl_matrix *QixHiDHiy_all_e=gsl_matrix_alloc (dc_size, v_size);
+  QixHiDHiy_all_e <- matrix(nrow = dc_size, ncol = v_size)
 	#gsl_matrix *QixHiDHix_all_g=gsl_matrix_alloc (dc_size, v_size*dc_size);
+  QixHiDHix_all_g <- matrix(nrow = dc_size, ncol = v_size * dc_size)
 	#gsl_matrix *QixHiDHix_all_e=gsl_matrix_alloc (dc_size, v_size*dc_size);
+  QixHiDHix_all_e <- matrix(nrow = dc_size, ncol = v_size * dc_size)
 	#gsl_matrix *QixHiDHixQixHiy_all_g=gsl_matrix_alloc (dc_size, v_size);
+  QixHiDHixQixHiy_all_g <- matrix(nrow = dc_size, ncol = v_size)
 	#gsl_matrix *QixHiDHixQixHiy_all_e=gsl_matrix_alloc (dc_size, v_size);
+  QixHiDHixQixHiy_all_e <- matrix(nrow = dc_size, ncol = v_size)
 
 	#gsl_matrix *xHiDHiDHiy_all_gg=gsl_matrix_alloc (dc_size, v_size*v_size);
+  xHiDHiDHiy_all_gg <- matrix(nrow = dc_size, ncol = v_size^2)
 	#gsl_matrix *xHiDHiDHiy_all_ee=gsl_matrix_alloc (dc_size, v_size*v_size);
+  xHiDHiDHiy_all_ee <- matrix(nrow = dc_size, ncol = v_size^2)
 	#gsl_matrix *xHiDHiDHiy_all_ge=gsl_matrix_alloc (dc_size, v_size*v_size);
+  xHiDHiDHiy_all_ge <- matrix(nrow = dc_size, ncol = v_size^2)
 	#gsl_matrix *xHiDHiDHix_all_gg=gsl_matrix_alloc (dc_size, v_size*v_size*dc_size);
+  xHiDHiDHix_all_gg <- matrix(nrow = dc_size, ncol = v_size^2 * dc_size)
 	#gsl_matrix *xHiDHiDHix_all_ee=gsl_matrix_alloc (dc_size, v_size*v_size*dc_size);
+  xHiDHiDHix_all_ee <- matrix(nrow = dc_size, ncol = v_size^2 * dc_size)
 	#gsl_matrix *xHiDHiDHix_all_ge=gsl_matrix_alloc (dc_size, v_size*v_size*dc_size);#
+  xHiDHiDHix_all_ge <- matrix(nrow = dc_size, ncol = v_size^2 * dc_size)
 
 	#//calculate xHiDHiy_all, xHiDHix_all and xHiDHixQixHiy_all
-	Calc_xHiDHiy_all (eval, xHi, Hiy, xHiDHiy_all_g, xHiDHiy_all_e);
-	Calc_xHiDHix_all (eval, xHi, xHiDHix_all_g, xHiDHix_all_e);
-	Calc_xHiDHixQixHiy_all (xHiDHix_all_g, xHiDHix_all_e, QixHiy, xHiDHixQixHiy_all_g, xHiDHixQixHiy_all_e);
+# 	Calc_xHiDHiy_all (eval, xHi, Hiy, xHiDHiy_all_g, xHiDHiy_all_e);
+  foo <- Calc_xHiDHiy_all (eval, xHi, Hiy)
+  foo[[1]] -> xHiDHiy_all_g
+  foo[[2]] -> xHiDHiy_all_e
+# 	Calc_xHiDHix_all (eval, xHi, xHiDHix_all_g, xHiDHix_all_e);
+  foo <- Calc_xHiDHix_all (eval, xHi)
+  foo[[1]] -> xHiDHix_all_g
+  foo[[2]] -> xHiDHix_all_e
+# 	Calc_xHiDHixQixHiy_all (xHiDHix_all_g, xHiDHix_all_e, QixHiy, xHiDHixQixHiy_all_g, xHiDHixQixHiy_all_e);
+  foo <- Calc_xHiDHixQixHiy_all (xHiDHix_all_g, xHiDHix_all_e, QixHiy)
+  xHiDHixQixHiy_all_g <- foo[[1]]
+  xHiDHixQixHiy_all_e <- foo[[2]]
+# 
+# 	Calc_xHiDHiDHiy_all (v_size, eval, Hi, xHi, Hiy, xHiDHiDHiy_all_gg, xHiDHiDHiy_all_ee, xHiDHiDHiy_all_ge);
+  foo <- Calc_xHiDHiDHiy_all(v_size, eval, Hi, xHi, Hiy)
+  foo[[1]] -> xHiDHiDHiy_all_gg
+  foo[[2]] -> xHiDHiDHiy_all_ee
+  foo[[3]] -> xHiDHiDHiy_all_ge
+# 	Calc_xHiDHiDHix_all (v_size, eval, Hi, xHi, xHiDHiDHix_all_gg, xHiDHiDHix_all_ee, xHiDHiDHix_all_ge);
+  foo <- Calc_xHiDHiDHix_all (v_size, eval, Hi, xHi)
+  xHiDHiDHix_all_gg <- foo[[1]]
+  xHiDHiDHix_all_ee <- foo[[2]]
+  xHiDHiDHix_all_ge <- foo[[3]]
+# 
+# 	//calculate QixHiDHiy_all, QixHiDHix_all and QixHiDHixQixHiy_all
+# 	Calc_QiVec_all (Qi, xHiDHiy_all_g, xHiDHiy_all_e, QixHiDHiy_all_g, QixHiDHiy_all_e);
+  foo <- Calc_QiVec_all (Qi, xHiDHiy_all_g, xHiDHiy_all_e)
+  foo[[1]] -> QixHiDHiy_all_g
+  foo[[2]] -> QixHiDHiy_all_e
+  
+# 	Calc_QiVec_all (Qi, xHiDHixQixHiy_all_g, xHiDHixQixHiy_all_e, QixHiDHixQixHiy_all_g, QixHiDHixQixHiy_all_e);
+  foo <- Calc_QiVec_all (Qi, xHiDHixQixHiy_all_g, xHiDHixQixHiy_all_e)
+  foo[[1]] -> QixHiDHixQixHiy_all_g
+  foo[[2]] -> QixHiDHixQixHiy_all_e
+# 	Calc_QiMat_all (Qi, xHiDHix_all_g, xHiDHix_all_e, QixHiDHix_all_g, QixHiDHix_all_e);
+  foo <- Calc_QiMat_all (Qi, xHiDHix_all_g, xHiDHix_all_e)
+  foo[[1]] -> QixHiDHix_all_g
+  foo[[2]] -> QixHiDHix_all_e
+# 
+# 	double tHiD_g, tHiD_e, tPD_g, tPD_e, tHiDHiD_gg, tHiDHiD_ee, tHiDHiD_ge, tPDPD_gg, tPDPD_ee, tPDPD_ge;
+# 	double yPDPy_g, yPDPy_e, yPDPDPy_gg, yPDPDPy_ee, yPDPDPy_ge;
+# 
+# 	#//calculate gradient and Hessian for Vg
+# 	for (size_t i1=0; i1<d_size; i1++) {
+  for (i1 in 1:d_size){
+# 		for (size_t j1=0; j1<d_size; j1++) {
+    for (j1 in 1:d_size){
+# 			if (j1<i1) {continue;}
+      if (!(j1 < i1)){
+        v1 <- GetIndex (i1, j1, d_size)
+        Calc_yPDPy(eval, Hiy, QixHiy, xHiDHiy_all_g, xHiDHiy_all_e, xHiDHixQixHiy_all_g, xHiDHixQixHiy_all_e, i1, j1)
+      
+# 			v1=GetIndex (i1, j1, d_size);
+# 
+# 			Calc_yPDPy (eval, Hiy, QixHiy, xHiDHiy_all_g, xHiDHiy_all_e, xHiDHixQixHiy_all_g, xHiDHixQixHiy_all_e, i1, j1, yPDPy_g, yPDPy_e);
+# 
+# 			if (func_name=='R' || func_name=='r') {
+# 				Calc_tracePD (eval, Qi, Hi, xHiDHix_all_g, xHiDHix_all_e, i1, j1, tPD_g, tPD_e);
+        foo <- Calc_tracePD(eval, Qi, Hi, xHiDHix_all_g, xHiDHix_all_e, i1, j1)
+        foo[[1]] -> tPD_g
+        foo[[2]] -> tPD_e
+        #//cout<<i1<<" "<<j1<<" "<<yPDPy_g<<" "<<yPDPy_e<<" "<<tPD_g<<" "<<tPD_e<<endl;
+# 
+# 				dev1_g=-0.5*tPD_g+0.5*yPDPy_g;
+        dev1_g <- - 0.5 * tPD_g + 0.5 * yPDPy_g
+# 				dev1_e=-0.5*tPD_e+0.5*yPDPy_e;
+        dev1_e <- - 0.5 * tPD_e + 0.5 * yPDPy_e
+# 			} else {
+# 				Calc_traceHiD (eval, Hi, i1, j1, tHiD_g, tHiD_e);
+# 
+# 				dev1_g=-0.5*tHiD_g+0.5*yPDPy_g;
+# 				dev1_e=-0.5*tHiD_e+0.5*yPDPy_e;
+# 			}
+# 
+# 			gsl_vector_set (gradient, v1, dev1_g);
+        gradient[v1] <- dev1_g
+# 			gsl_vector_set (gradient, v1+v_size, dev1_e);
+        gradient[v1 + v_size] <- dev1_e
+# 
+# 			for (size_t i2=0; i2<d_size; i2++) {
+        for (i2 in 1:d_size){
+# 				for (size_t j2=0; j2<d_size; j2++) {
+          for (j2 in 1:d_size){
+# 					if (j2<i2) {continue;}
+            if (!(j2 < i2)){
+# 					v2=GetIndex (i2, j2, d_size);
+              v2 <- GetIndex(i2, j2, d_size)
+# 
+# 					if (v2<v1) {continue;}
+              if (!(v2 < v1)){
+                
+              
+# 
+# 					Calc_yPDPDPy (eval, Hi, xHi, Hiy, QixHiy, xHiDHiy_all_g, xHiDHiy_all_e, QixHiDHiy_all_g, QixHiDHiy_all_e, xHiDHixQixHiy_all_g, xHiDHixQixHiy_all_e, QixHiDHixQixHiy_all_g, QixHiDHixQixHiy_all_e, xHiDHiDHiy_all_gg, xHiDHiDHiy_all_ee, xHiDHiDHiy_all_ge, xHiDHiDHix_all_gg, xHiDHiDHix_all_ee, xHiDHiDHix_all_ge, i1, j1, i2, j2, yPDPDPy_gg, yPDPDPy_ee, yPDPDPy_ge);
+                foo <- Calc_yPDPDPy (eval, Hi, xHi, Hiy, QixHiy, xHiDHiy_all_g, xHiDHiy_all_e, QixHiDHiy_all_g, QixHiDHiy_all_e, xHiDHixQixHiy_all_g, xHiDHixQixHiy_all_e, QixHiDHixQixHiy_all_g, QixHiDHixQixHiy_all_e, xHiDHiDHiy_all_gg, xHiDHiDHiy_all_ee, xHiDHiDHiy_all_ge, xHiDHiDHix_all_gg, xHiDHiDHix_all_ee, xHiDHiDHix_all_ge, i1, j1, i2, j2)
+                foo[[1]] -> yPDPDPy_gg
+                foo[[2]] -> yPDPDPy_ee
+                foo[[3]] -> yPDPDPy_ge
+# 
+# 					//cout<<i1<<" "<<j1<<" "<<i2<<" "<<j2<<" "<<yPDPDPy_gg<<" "<<yPDPDPy_ee<<" "<<yPDPDPy_ge<<endl;
+# 					//AI for reml
+# 					if (func_name=='R' || func_name=='r') {
+# 						Calc_tracePDPD (eval, Qi, Hi, xHi, QixHiDHix_all_g, QixHiDHix_all_e, xHiDHiDHix_all_gg, xHiDHiDHix_all_ee, xHiDHiDHix_all_ge, i1, j1, i2, j2, tPDPD_gg, tPDPD_ee, tPDPD_ge);
+                foo <- Calc_tracePDPD (eval, Qi, Hi, xHi, QixHiDHix_all_g, QixHiDHix_all_e, xHiDHiDHix_all_gg, xHiDHiDHix_all_ee, xHiDHiDHix_all_ge, i1, j1, i2, j2)
+                foo[[1]] -> tPDPD_gg
+                foo[[2]] -> tPDPD_ee
+                foo[[3]] -> tPDPD_ge
+# 
+# 						dev2_gg=0.5*tPDPD_gg-yPDPDPy_gg;
+                dev2_gg <- 0.5 * tPDPD_gg-yPDPDPy_gg
+# 						dev2_ee=0.5*tPDPD_ee-yPDPDPy_ee;
+                dev2_ee <- 0.5 * tPDPD_ee - yPDPDPy_ee
+# 						dev2_ge=0.5*tPDPD_ge-yPDPDPy_ge;
+                dev2_ge <- 0.5 * tPDPD_ge - yPDPDPy_ge
+# 						/*
+# 						dev2_gg=-0.5*yPDPDPy_gg;
+# 						dev2_ee=-0.5*yPDPDPy_ee;
+# 						dev2_ge=-0.5*yPDPDPy_ge;
+# 						*/
+# 					} else {
+# 						Calc_traceHiDHiD (eval, Hi, i1, j1, i2, j2, tHiDHiD_gg, tHiDHiD_ee, tHiDHiD_ge);
+# 
+# 						dev2_gg=0.5*tHiDHiD_gg-yPDPDPy_gg;
+# 						dev2_ee=0.5*tHiDHiD_ee-yPDPDPy_ee;
+# 						dev2_ge=0.5*tHiDHiD_ge-yPDPDPy_ge;
+# 					}
+# 
+# 					//set up Hessian
+# 					gsl_matrix_set (Hessian, v1, v2, dev2_gg);
+                Hessian[v1, v2] <- dev2_gg
+# 					gsl_matrix_set (Hessian, v1+v_size, v2+v_size, dev2_ee);
+                Hessian[v1 + v_size, v2 + v_size] <- dev2_ee
+# 					gsl_matrix_set (Hessian, v1, v2+v_size, dev2_ge);
+                Hessian[v1, v2 + v_size] <- dev2_ge
+# 					gsl_matrix_set (Hessian, v2+v_size, v1, dev2_ge);
+                Hessian[v2 + v_size, v1] <- dev2_ge
+# 
+# 					if (v1!=v2) {
+                if (v1 != v2){
+# 						gsl_matrix_set (Hessian, v2, v1, dev2_gg);
+                  Hessian[v2, v1] <- dev2_gg
+# 						gsl_matrix_set (Hessian, v2+v_size, v1+v_size, dev2_ee);
+                  Hessian[v2 + v_size, v1 + v_size] <- dev2_ee
+# 						gsl_matrix_set (Hessian, v2, v1+v_size, dev2_ge);
+                  Hessian[v2, v1 + v_size] <- dev2_ge
+# 						gsl_matrix_set (Hessian, v1+v_size, v2, dev2_ge);
+                  Hessian[v1 + v_size, v2] <- dev2_ge
+                }
+# 					}
+              }
+            }
+# 				}
+      } # end if 
+    } # end j loop
+  } # end i loop
+    
+# 			}
+# 		}
+# 	}
+# 
+# 	/*
+# 	cout<<"Hessian: "<<endl;
+# 	for (size_t i=0; i<2*v_size; i++) {
+# 		for (size_t j=0; j<2*v_size; j++) {
+# 			cout<<gsl_matrix_get(Hessian, i, j)<<"\t";
+# 		}
+# 		cout<<endl;
+# 	}
+# 	*/
+# 
+# 
+# 	//Invert Hessian
+# 	int sig;
+# 	gsl_permutation * pmt=gsl_permutation_alloc (v_size*2);
+# 
+# 	LUDecomp (Hessian, pmt, &sig);
+# 	LUInvert (Hessian, pmt, Hessian_inv);
+  Hessian_inv <- solve(Hessian)
 
-	Calc_xHiDHiDHiy_all (v_size, eval, Hi, xHi, Hiy, xHiDHiDHiy_all_gg, xHiDHiDHiy_all_ee, xHiDHiDHiy_all_ge);
-	Calc_xHiDHiDHix_all (v_size, eval, Hi, xHi, xHiDHiDHix_all_gg, xHiDHiDHix_all_ee, xHiDHiDHix_all_ge);
-
-	//calculate QixHiDHiy_all, QixHiDHix_all and QixHiDHixQixHiy_all
-	Calc_QiVec_all (Qi, xHiDHiy_all_g, xHiDHiy_all_e, QixHiDHiy_all_g, QixHiDHiy_all_e);
-	Calc_QiVec_all (Qi, xHiDHixQixHiy_all_g, xHiDHixQixHiy_all_e, QixHiDHixQixHiy_all_g, QixHiDHixQixHiy_all_e);
-	Calc_QiMat_all (Qi, xHiDHix_all_g, xHiDHix_all_e, QixHiDHix_all_g, QixHiDHix_all_e);
-
-	double tHiD_g, tHiD_e, tPD_g, tPD_e, tHiDHiD_gg, tHiDHiD_ee, tHiDHiD_ge, tPDPD_gg, tPDPD_ee, tPDPD_ge;
-	double yPDPy_g, yPDPy_e, yPDPDPy_gg, yPDPDPy_ee, yPDPDPy_ge;
-
-	#//calculate gradient and Hessian for Vg
-	for (size_t i1=0; i1<d_size; i1++) {
-		for (size_t j1=0; j1<d_size; j1++) {
-			if (j1<i1) {continue;}
-			v1=GetIndex (i1, j1, d_size);
-
-			Calc_yPDPy (eval, Hiy, QixHiy, xHiDHiy_all_g, xHiDHiy_all_e, xHiDHixQixHiy_all_g, xHiDHixQixHiy_all_e, i1, j1, yPDPy_g, yPDPy_e);
-
-			if (func_name=='R' || func_name=='r') {
-				Calc_tracePD (eval, Qi, Hi, xHiDHix_all_g, xHiDHix_all_e, i1, j1, tPD_g, tPD_e);
-				//cout<<i1<<" "<<j1<<" "<<yPDPy_g<<" "<<yPDPy_e<<" "<<tPD_g<<" "<<tPD_e<<endl;
-
-				dev1_g=-0.5*tPD_g+0.5*yPDPy_g;
-				dev1_e=-0.5*tPD_e+0.5*yPDPy_e;
-			} else {
-				Calc_traceHiD (eval, Hi, i1, j1, tHiD_g, tHiD_e);
-
-				dev1_g=-0.5*tHiD_g+0.5*yPDPy_g;
-				dev1_e=-0.5*tHiD_e+0.5*yPDPy_e;
-			}
-
-			gsl_vector_set (gradient, v1, dev1_g);
-			gsl_vector_set (gradient, v1+v_size, dev1_e);
-
-			for (size_t i2=0; i2<d_size; i2++) {
-				for (size_t j2=0; j2<d_size; j2++) {
-					if (j2<i2) {continue;}
-					v2=GetIndex (i2, j2, d_size);
-
-					if (v2<v1) {continue;}
-
-					Calc_yPDPDPy (eval, Hi, xHi, Hiy, QixHiy, xHiDHiy_all_g, xHiDHiy_all_e, QixHiDHiy_all_g, QixHiDHiy_all_e, xHiDHixQixHiy_all_g, xHiDHixQixHiy_all_e, QixHiDHixQixHiy_all_g, QixHiDHixQixHiy_all_e, xHiDHiDHiy_all_gg, xHiDHiDHiy_all_ee, xHiDHiDHiy_all_ge, xHiDHiDHix_all_gg, xHiDHiDHix_all_ee, xHiDHiDHix_all_ge, i1, j1, i2, j2, yPDPDPy_gg, yPDPDPy_ee, yPDPDPy_ge);
-
-					//cout<<i1<<" "<<j1<<" "<<i2<<" "<<j2<<" "<<yPDPDPy_gg<<" "<<yPDPDPy_ee<<" "<<yPDPDPy_ge<<endl;
-					//AI for reml
-					if (func_name=='R' || func_name=='r') {
-						Calc_tracePDPD (eval, Qi, Hi, xHi, QixHiDHix_all_g, QixHiDHix_all_e, xHiDHiDHix_all_gg, xHiDHiDHix_all_ee, xHiDHiDHix_all_ge, i1, j1, i2, j2, tPDPD_gg, tPDPD_ee, tPDPD_ge);
-
-						dev2_gg=0.5*tPDPD_gg-yPDPDPy_gg;
-						dev2_ee=0.5*tPDPD_ee-yPDPDPy_ee;
-						dev2_ge=0.5*tPDPD_ge-yPDPDPy_ge;
-						/*
-						dev2_gg=-0.5*yPDPDPy_gg;
-						dev2_ee=-0.5*yPDPDPy_ee;
-						dev2_ge=-0.5*yPDPDPy_ge;
-						*/
-					} else {
-						Calc_traceHiDHiD (eval, Hi, i1, j1, i2, j2, tHiDHiD_gg, tHiDHiD_ee, tHiDHiD_ge);
-
-						dev2_gg=0.5*tHiDHiD_gg-yPDPDPy_gg;
-						dev2_ee=0.5*tHiDHiD_ee-yPDPDPy_ee;
-						dev2_ge=0.5*tHiDHiD_ge-yPDPDPy_ge;
-					}
-
-					//set up Hessian
-					gsl_matrix_set (Hessian, v1, v2, dev2_gg);
-					gsl_matrix_set (Hessian, v1+v_size, v2+v_size, dev2_ee);
-					gsl_matrix_set (Hessian, v1, v2+v_size, dev2_ge);
-					gsl_matrix_set (Hessian, v2+v_size, v1, dev2_ge);
-
-					if (v1!=v2) {
-						gsl_matrix_set (Hessian, v2, v1, dev2_gg);
-						gsl_matrix_set (Hessian, v2+v_size, v1+v_size, dev2_ee);
-						gsl_matrix_set (Hessian, v2, v1+v_size, dev2_ge);
-						gsl_matrix_set (Hessian, v1+v_size, v2, dev2_ge);
-					}
-				}
-			}
-		}
-	}
-
-	/*
-	cout<<"Hessian: "<<endl;
-	for (size_t i=0; i<2*v_size; i++) {
-		for (size_t j=0; j<2*v_size; j++) {
-			cout<<gsl_matrix_get(Hessian, i, j)<<"\t";
-		}
-		cout<<endl;
-	}
-	*/
-
-
-	//Invert Hessian
-	int sig;
-	gsl_permutation * pmt=gsl_permutation_alloc (v_size*2);
-
-	LUDecomp (Hessian, pmt, &sig);
-	LUInvert (Hessian, pmt, Hessian_inv);
-	/*
-	cout<<"Hessian Inverse: "<<endl;
-	for (size_t i=0; i<2*v_size; i++) {
-		for (size_t j=0; j<2*v_size; j++) {
-			cout<<gsl_matrix_get(Hessian_inv, i, j)<<"\t";
-		}
-		cout<<endl;
-	}
-	*/
-	gsl_permutation_free(pmt);
-	gsl_matrix_free(Hessian);
-
-	//calculate Edgeworth correction factors
-	//after inverting Hessian
-	if (c_size>1) {
-		CalcCRT (Hessian_inv, Qi, QixHiDHix_all_g, QixHiDHix_all_e, xHiDHiDHix_all_gg, xHiDHiDHix_all_ee, xHiDHiDHix_all_ge, d_size, crt_a, crt_b, crt_c);
-	} else {
-		crt_a=0.0; crt_b=0.0; crt_c=0.0;
-	}
-
-	gsl_matrix_free(xHiDHiy_all_g);
-	gsl_matrix_free(xHiDHiy_all_e);
-	gsl_matrix_free(xHiDHix_all_g);
-	gsl_matrix_free(xHiDHix_all_e);
-	gsl_matrix_free(xHiDHixQixHiy_all_g);
-	gsl_matrix_free(xHiDHixQixHiy_all_e);
-
-	gsl_matrix_free(QixHiDHiy_all_g);
-	gsl_matrix_free(QixHiDHiy_all_e);
-	gsl_matrix_free(QixHiDHix_all_g);
-	gsl_matrix_free(QixHiDHix_all_e);
-	gsl_matrix_free(QixHiDHixQixHiy_all_g);
-	gsl_matrix_free(QixHiDHixQixHiy_all_e);
-
-	gsl_matrix_free(xHiDHiDHiy_all_gg);
-	gsl_matrix_free(xHiDHiDHiy_all_ee);
-	gsl_matrix_free(xHiDHiDHiy_all_ge);
-	gsl_matrix_free(xHiDHiDHix_all_gg);
-	gsl_matrix_free(xHiDHiDHix_all_ee);
-	gsl_matrix_free(xHiDHiDHix_all_ge);
-
-	return;
+  # 	/*
+# 	cout<<"Hessian Inverse: "<<endl;
+# 	for (size_t i=0; i<2*v_size; i++) {
+# 		for (size_t j=0; j<2*v_size; j++) {
+# 			cout<<gsl_matrix_get(Hessian_inv, i, j)<<"\t";
+# 		}
+# 		cout<<endl;
+# 	}
+# 	*/
+# 	gsl_permutation_free(pmt);
+# 	gsl_matrix_free(Hessian);
+# 
+# 	//calculate Edgeworth correction factors
+# 	//after inverting Hessian
+# 	if (c_size>1) {
+# 		CalcCRT (Hessian_inv, Qi, QixHiDHix_all_g, QixHiDHix_all_e, xHiDHiDHix_all_gg, xHiDHiDHix_all_ee, xHiDHiDHix_all_ge, d_size, crt_a, crt_b, crt_c);
+# 	} else {
+# 		crt_a=0.0; crt_b=0.0; crt_c=0.0;
+# 	}
+# 
+# 	gsl_matrix_free(xHiDHiy_all_g);
+# 	gsl_matrix_free(xHiDHiy_all_e);
+# 	gsl_matrix_free(xHiDHix_all_g);
+# 	gsl_matrix_free(xHiDHix_all_e);
+# 	gsl_matrix_free(xHiDHixQixHiy_all_g);
+# 	gsl_matrix_free(xHiDHixQixHiy_all_e);
+# 
+# 	gsl_matrix_free(QixHiDHiy_all_g);
+# 	gsl_matrix_free(QixHiDHiy_all_e);
+# 	gsl_matrix_free(QixHiDHix_all_g);
+# 	gsl_matrix_free(QixHiDHix_all_e);
+# 	gsl_matrix_free(QixHiDHixQixHiy_all_g);
+# 	gsl_matrix_free(QixHiDHixQixHiy_all_e);
+# 
+# 	gsl_matrix_free(xHiDHiDHiy_all_gg);
+# 	gsl_matrix_free(xHiDHiDHiy_all_ee);
+# 	gsl_matrix_free(xHiDHiDHiy_all_ge);
+# 	gsl_matrix_free(xHiDHiDHix_all_gg);
+# 	gsl_matrix_free(xHiDHiDHix_all_ee);
+# 	gsl_matrix_free(xHiDHiDHix_all_ge);
+# 
+# 	return;
+# }
+    }
+  }
+  return(list(Hessian_inv, gradient))
 }
-
 ```
 
 
