@@ -240,7 +240,7 @@ calc_qi <- function(eval, D_l, X){
       for (l in 1:d_size){
         dl <- D_l[l]
         if (j < i){
-          d <- Q[j * d_size + l, i * d_size + l]
+          d <- Q[(j - 1) * d_size + l, (i - 1) * d_size + l]
         } else {
           d <- 0
           for (k in 1:n_size){
@@ -250,7 +250,7 @@ calc_qi <- function(eval, D_l, X){
             d <- d + d1 * d2 / (dl * delta + 1)
           }
         }
-        Q[i * d_size + l, j * d_size + l] <- d
+        Q[(i -1) * d_size + l, (j - 1) * d_size + l] <- d
       }
     }
   }
@@ -275,7 +275,7 @@ They define the matrices `OmegaU` and `OmegaE`. Note that the two omega matrices
 
 ### calc_omega R code
 
-```{r, eval = FALSE}
+```{r, eval = TRUE}
 calc_omega <- function(eval, D_l){
   n_size <- length(eval)
   d_size <- length(D_l)
@@ -452,13 +452,14 @@ Together, the lines contained in the `for` loop serve to copy the elements of th
 
 
 ```{r}
-updateRL_B <- function(xHiy, Qi, d_size){
+UpdateRL_B <- function(xHiy, Qi, d_size = 2){
   nrow(Qi) -> dc_size
   c_size <- dc_size / d_size
   b <- vector(length = dc_size)
   b <- Qi %*% xHiy
+  UltVehiB <- matrix(nrow = d_size, ncol = c_size)
   for (i in 1:c_size){
-    b_subcol <- b[1 + (i - 1) * d_size, i * d_size]
+    b_subcol <- b[(1 + (i - 1) * d_size):(i * d_size)]
     b_subcol -> UltVehiB[, i] # could use as.matrix here
   }
   return(UltVehiB)
@@ -628,8 +629,8 @@ calc_sigma <- function(eval, D_l, X, OmegaU, OmegaE, UltVeh, Qi, func_name = "R"
         for (j in 1:c_size){
           x <- X[j, k]
           d <- x / (delta * dl + 1)
-          M_e[j * d_size + i, i] <- d
-          M_u[j * d_size + i, i] <- d * dl
+          M_e[(j -1) * d_size + i, i] <- d
+          M_u[(j - 1) * d_size + i, i] <- d * dl
           
         }
       }
@@ -833,6 +834,7 @@ MphCalcLogL <- function(eval, D_l, Qi, UltVehiY, xHiy){
     delta <- eval[k]
     for (i in 1:d_size){
       y <- UltVehiY[i, k]
+      is.na(y)
       dl <- D_l[i]
       d <- delta * dl + 1
       logl <- logl + y^2 / d + log(d)
@@ -850,7 +852,7 @@ MphCalcLogL <- function(eval, D_l, Qi, UltVehiY, xHiy){
 ### R code for MphEM
 
 ```{r}
-MphEM <- function(func_name = "R", max_iter = 10000, max_prec = 1 / 1000, eval, X, Y){
+MphEM <- function(func_name = "R", max_iter = 10000, max_prec = 1 / 1000, eval, X, Y, V_g, V_e){
   n_size <- length(eval)
   c_size <- nrow(X)
   d_size <- nrow(Y)
@@ -865,10 +867,11 @@ MphEM <- function(func_name = "R", max_iter = 10000, max_prec = 1 / 1000, eval, 
     logl_const <- n_size * d_size * log(2 * pi) / 2 
   }
   out <- list()
+  logl_old <- 1 # we need to define logl_old before using it within the EM iterations
   # start EM
   for (t in 1:max_iter){
     # eigen_proc
-    ep_out <- eigen_proc(V_g, V_e)
+    ep_out <- eigen_proc(Vg = V_g, Ve = V_e)
     ep_out[[1]] -> logdet_Ve
     ep_out[[2]] -> UltVeh
     ep_out[[3]] -> UltVehi
@@ -881,11 +884,11 @@ MphEM <- function(func_name = "R", max_iter = 10000, max_prec = 1 / 1000, eval, 
     UltVehiY <- UltVehi %*% Y
     # 
     xHiy <- calc_XHiY(eval, D_l, X, UltVehiY)
-    logl_new <- logl_const + MphCalcLogL(eval, xHiy, D_l, UltVehiY, Qi) - 0.5 * n_size * logdet_Ve
+    logl_new <- logl_const + MphCalcLogL(eval = eval, xHiy = xHiy, D_l = D_l, UltVehiY = UltVehiY, Qi = Qi) - 0.5 * n_size * logdet_Ve
     if (func_name=='R') {
 			logl_new<- logl_new - 0.5 * (lndetQ - c_size * logdet_Ve)
 		}
-		if (t > 1 & abs(logl_new - logl_old) < max_prec) {break}
+	#	if (t > 1 & abs(logl_new - logl_old) < max_prec) {break}
 		logl_old <- logl_new
 		co_out <- calc_omega(eval, D_l)
 		co_out[[1]] -> OmegaU
@@ -899,7 +902,7 @@ MphEM <- function(func_name = "R", max_iter = 10000, max_prec = 1 / 1000, eval, 
 		U_hat <- t(UltVeh) %*% UltVehiU
 		E_hat <- t(UltVeh) %*% UltVehiE
 		B <- t(UltVeh) %*% UltVehiB 
-		cs_out <- calc_sigma(func_name, eval, D_l, X, OmegaU, OmegaE, UltVeh, Qi)
+		cs_out <- calc_sigma(func_name = func_name, eval = eval, D_l = D_l, X = X, OmegaU = OmegaU, OmegaE = OmegaE, UltVeh = UltVeh, Qi = Qi)
 		cs_out[[1]] -> Sigma_uu
 		cs_out[[2]] -> Sigma_ee
 		uv_out <- update_v(eval, U_hat, E_hat, Sigma_uu, Sigma_ee)
@@ -916,7 +919,7 @@ MphEM <- function(func_name = "R", max_iter = 10000, max_prec = 1 / 1000, eval, 
 ```{r}
 # void MphInitial(const size_t em_iter, const double em_prec, const size_t nr_iter, const double nr_prec, const gsl_vector *eval, const gsl_matrix *X, const gsl_matrix *Y, const double l_min, const double l_max, const size_t n_region, gsl_matrix *V_g, gsl_matrix *V_e, gsl_matrix *B)
 # {
-MphInitial <- function(em_iter, em_prec, nr_iter, nr_prec, eval, X, Y, l_min, l_max, n_region){
+MphInitial <- function(eval, X, Y){
   n_size <- length(eval)
   c_size <- nrow(X)
   d_size <- nrow(Y)
@@ -955,7 +958,11 @@ MphInitial <- function(em_iter, em_prec, nr_iter, nr_prec, eval, X, Y, l_min, l_
     cl_out[[4]] -> beta_temp
     cl_out[[5]] -> se_beta_temp
 # 		CalcLmmVgVeBeta (eval, Xt, &Y_row.vector, lambda, vg, ve, beta_temp, se_beta_temp);
-    cl_out <- CalcLmmVgVeBeta(eval, Xt, Y_row, lambda, vg, ve, beta_temp, se_beta_temp)
+    cl_out <- CalcLmmVgVeBeta(eval, Xt, Y_row, lambda)
+    cl_out[[1]] -> vg
+    cl_out[[2]] -> ve
+    cl_out[[3]] -> beta_temp
+    cl_out[[4]] -> se_beta_temp
 # 
 # 		gsl_matrix_set(V_g, i, i, vg);
     V_g[i, i] <- vg
@@ -1137,29 +1144,48 @@ MphInitial <- function(em_iter, em_prec, nr_iter, nr_prec, eval, X, Y, l_min, l_
 # 
 # 	//calculate XHiy
 # 	for (size_t i=0; i<d_size; i++) {
+  for (i in 1:d_size){
 # 		dl=gsl_vector_get(D_l, i);
+    dl <- D_l[i]
 # 
 # 		for (size_t j=0; j<c_size; j++) {
+    for (j in 1:c_size){
 # 			d=0.0;
+      d <- 0
 # 			for (size_t k=0; k<n_size; k++) {
+      for (k in 1:n_size){
 # 				delta=gsl_vector_get(eval, k);
+        delta <- eval[k]
 # 				dx=gsl_matrix_get(X, j, k);
+        dx <- X[j, k]
 # 				dy=gsl_matrix_get(UltVehiY, i, k);
+        dy <- UltVehiY[i, k]
 # 
 # 				//if (delta==0) {continue;}
 # 				d+=dy*dx/(delta*dl+1.0);
+        d <- d + dy * dx / (delta * dl + 1)
+      }
 # 			}
 # 			gsl_vector_set(XHiy, j*d_size+i, d);
+        XHiy[(j - 1) * d_size + i] <- d
+    }
+  }
 # 		}
 # 	}
 # 
 # 	gsl_blas_dgemv(CblasNoTrans, 1.0, Qi, XHiy, 0.0, beta);
+  beta <- Qi %*% XHiy
 # 
 # 	//multiply beta by UltVeh and save to B
 # 	for (size_t i=0; i<c_size; i++) {
+  for (i in 1:c_size){
 # 		gsl_vector_view B_col=gsl_matrix_column (B, i);
 # 		gsl_vector_view beta_sub=gsl_vector_subvector (beta, i*d_size, d_size);
+    beta_sub <- beta[((i - 1) * d_size + 1):(i * d_size)]
 # 		gsl_blas_dgemv(CblasTrans, 1.0, UltVeh, &beta_sub.vector, 0.0, &B_col.vector);
+    B_col <- t(UltVeh) %*% beta_sub
+    B[, i] <- B_col
+  }
 # 	}
 # 
 # 	//free memory
@@ -1173,7 +1199,300 @@ MphInitial <- function(em_iter, em_prec, nr_iter, nr_prec, eval, X, Y, l_min, l_
 # 	gsl_vector_free(beta);
 # 
 # 	return;
+    return(list(V_g, V_e, B))
 # }
+}
+```
+
+### R code for `CalcLmmVgVeBeta`
+
+
+
+```{r}
+#void CalcLmmVgVeBeta (const gsl_vector *eval, const gsl_matrix *UtW, const gsl_vector *Uty, const double lambda, double &vg, double &ve, gsl_vector *beta, gsl_vector *se_beta)
+#{
+CalcLmmVgVeBeta <- function(eval, UtW, Uty, lambda){
+# 	size_t n_cvt=UtW->size2, ni_test=UtW->size1;
+  n_cvt <- ncol(UtW)
+  ni_test <- nrow(UtW)
+# 	size_t n_index=(n_cvt+2+1)*(n_cvt+2)/2;
+  n_index <- (n_cvt + 2 + 1) * (n_cvt + 2) / 2
+# 
+# 	gsl_matrix *Uab=gsl_matrix_alloc (ni_test, n_index);
+# 	gsl_vector *ab=gsl_vector_alloc (n_index);
+# 	gsl_matrix *Pab=gsl_matrix_alloc (n_cvt+2, n_index);
+# 	gsl_vector *Hi_eval=gsl_vector_alloc(eval->size);
+# 	gsl_vector *v_temp=gsl_vector_alloc(eval->size);
+# 	gsl_matrix *HiW=gsl_matrix_alloc(eval->size, UtW->size2);
+# 	gsl_matrix *WHiW=gsl_matrix_alloc(UtW->size2, UtW->size2);
+# 	gsl_vector *WHiy=gsl_vector_alloc(UtW->size2);
+# 	gsl_matrix *Vbeta=gsl_matrix_alloc(UtW->size2, UtW->size2);
+# 
+# 	gsl_matrix_set_zero (Uab);
+# 	CalcUab (UtW, Uty, Uab);
+# 
+# 	gsl_vector_memcpy (v_temp, eval);
+  eval -> v_temp
+# 	gsl_vector_scale (v_temp, lambda);
+  v_temp -> v_temp * lambda
+# 	gsl_vector_set_all (Hi_eval, 1.0);
+  Hi_eval <- rep(1, n)
+# 	gsl_vector_add_constant (v_temp, 1.0);
+  v_temp <- v_temp + 1
+# 	gsl_vector_div (Hi_eval, v_temp);
+  Hi_eval <- Hi_eval / v_temp
+# 
+# 	//calculate beta
+# 	gsl_matrix_memcpy (HiW, UtW);
+  HiW <- UtW
+# 	for (size_t i=0; i<UtW->size2; i++) {
+  for (i in 1:ncol(UtW)){
+# 		gsl_vector_view HiW_col=gsl_matrix_column(HiW, i);
+    HiW_col <- HiW[, i]
+# 		gsl_vector_mul(&HiW_col.vector, Hi_eval);
+    HiW[, i] <- HiW_col * Hi_eval
+  }
+# 	}
+# 	gsl_blas_dgemm (CblasTrans, CblasNoTrans, 1.0, HiW, UtW, 0.0, WHiW);
+  t(HiW) %*% UtW -> WHiW
+# 	gsl_blas_dgemv (CblasTrans, 1.0, HiW, Uty, 0.0, WHiy);
+  WHiy <- t(HiW) %*% Uty
+# 
+# 	int sig;
+# 	gsl_permutation * pmt=gsl_permutation_alloc (UtW->size2);
+# 	LUDecomp (WHiW, pmt, &sig);
+# 	LUSolve (WHiW, pmt, WHiy, beta);
+  # https://www.gnu.org/software/gsl/manual/html_node/LU-Decomposition.html
+  beta <- solve(a = WHiW, b = WHiy)
+# 	LUInvert (WHiW, pmt, Vbeta);
+  solve(WHiW) -> Vbeta
+# 
+# 	//calculate vg and ve
+# 	CalcPab (n_cvt, 0, Hi_eval, Uab, ab, Pab);
+  CalcPab()
+# 
+# 	size_t index_yy=GetabIndex (n_cvt+2, n_cvt+2, n_cvt);
+  index_yy <- GetabIndex(n_cvt + 2, n_cvt + 2, n_cvt)
+# 	double P_yy=gsl_matrix_get (Pab, n_cvt, index_yy);
+  P_yy <- Pab[n_cvt, index_yy]
+# 
+# 	ve=P_yy/(double)(ni_test-n_cvt);
+  ve <- P_yy / (ni_test - n_cvt)
+# 	vg=ve*lambda;
+  vg <- ve * lambda
+# 
+# 	//with ve, calculate se(beta)
+# 	gsl_matrix_scale(Vbeta, ve);
+  Vbeta <- Vbeta * ve
+# 
+# 	//obtain se_beta
+# 	for (size_t i=0; i<Vbeta->size1; i++) {
+# 		gsl_vector_set (se_beta, i, sqrt(gsl_matrix_get(Vbeta, i, i) ) );
+# 	}
+# 
+  for (i in 1:nrow(Vbeta)){
+    se_beta[i] <- sqrt(Vbeta[i, i])
+  }
+  
+# 	gsl_matrix_free(Uab);
+# 	gsl_matrix_free(Pab);
+# 	gsl_vector_free(ab);
+# 	gsl_vector_free(Hi_eval);
+# 	gsl_vector_free(v_temp);
+# 	gsl_matrix_free(HiW);
+# 	gsl_matrix_free(WHiW);
+# 	gsl_vector_free(WHiy);
+# 	gsl_matrix_free(Vbeta);
+# 
+# 	gsl_permutation_free(pmt);
+# 	return;
+# }
+  return(list(vg, ve, beta, se_beta))
+}
+
+  
+```
+
+### R code for `CalcLambda`
+
+```{r}
+# void CalcLambda (const char func_name, FUNC_PARAM &params, const double l_min, const double l_max, const size_t n_region, double &lambda, double &logf)
+# {
+
+CalcLambda <- function(func_name = "R", params, l_min, l_max, n_region){
+
+# 	if (func_name!='R' && func_name!='L' && func_name!='r' && func_name!='l') {cout<<"func_name only takes 'R' or 'L': 'R' for log-restricted likelihood, 'L' for log-likelihood."<<endl; return;}
+# 
+# 	vector<pair<double, double> > lambda_lh; //DECLARE lambda_lh
+# 
+  lambda_lh <- matrix(nrow = 0, ncol = 2)
+# 	//evaluate first order derivates in different intervals
+# 	double lambda_l, lambda_h, lambda_interval=log(l_max/l_min)/(double)n_region;
+  lambda_interval <- log(l_max / l_min) / n_region
+# 	double dev1_l, dev1_h, logf_l, logf_h;
+# 
+# 	for (size_t i=0; i<n_region; ++i) {
+  for (i in 1:n_region){
+# 		lambda_l=l_min*exp(lambda_interval*i);
+    lambda_l <- l_min * exp(lambda_interval * (i - 1))
+# 		lambda_h=l_min*exp(lambda_interval*(i+1.0));
+    lambda_h <- l_min * exp(lambda_interval * (i))
+# 
+# 		if (func_name=='R' || func_name=='r') {
+    if (func_name == "R"){
+# 			dev1_l=LogRL_dev1 (lambda_l, &params);
+      dev1_l <- LogRL_dev1(lambda_l, params)
+      dev1_h <- LogRL_dev1(lambda_h, params)
+# 			dev1_h=LogRL_dev1 (lambda_h, &params);
+# 		}
+    } 
+# 		else {
+# 			dev1_l=LogL_dev1 (lambda_l, &params);
+      
+# 			dev1_h=LogL_dev1 (lambda_h, &params);
+# 		}
+# 
+# 		if (dev1_l*dev1_h<=0) {
+    if (dev1_l * dev1_h <= 0){
+# 			lambda_lh.push_back(make_pair(lambda_l, lambda_h));
+      lambda_lh[nrow(lambda_lh) + 1, 1] <- lambda_l
+      lambda_lh[nrow(lambda_lh) + 1, 2] <- lambda_h
+    }
+  }
+# 		}
+# 	}
+# 
+# 	//if derivates do not change signs in any interval
+# 	if (lambda_lh.empty()) {
+  if (nrow(lambda_lh) == 0){
+    if (func_name == "R"){
+      logf_l <- LogRL_f(l_min, params)
+  		logf_h <- LogRL_f(l_max, params)
+    }
+  
+# 		if (func_name=='R' || func_name=='r') {
+# 			logf_l=LogRL_f (l_min, &params);
+# 			logf_h=LogRL_f (l_max, &params);
+# 		}
+# 		else {
+# 			logf_l=LogL_f (l_min, &params);
+# 			logf_h=LogL_f (l_max, &params);
+# 		}
+# 
+# 		if (logf_l>=logf_h) {lambda=l_min; logf=logf_l;} else {lambda=l_max; logf=logf_h;}
+    if (logf_l >= logf_h){
+      lambda <- l_min
+      logf <- logf_l
+    } else {
+      lambda <- l_max
+      logf <- logf_h
+    }
+  } else {
+# 	}
+# 	else {
+# 		//if derivates change signs
+# 		int status;
+# 		int iter=0, max_iter=100;
+    iter <- 0
+    max_iter <- 100
+# 		double l, l_temp;
+# 
+# 		gsl_function F;
+# 		gsl_function_fdf FDF;
+# 
+# 		F.params=&params;
+# 		FDF.params=&params;
+# 
+# 		if (func_name=='R' || func_name=='r') {
+# 			F.function=&LogRL_dev1;
+# 			FDF.f=&LogRL_dev1;
+# 			FDF.df=&LogRL_dev2;
+# 			FDF.fdf=&LogRL_dev12;
+# 		}
+# 		else {
+# 			F.function=&LogL_dev1;
+# 			FDF.f=&LogL_dev1;
+# 			FDF.df=&LogL_dev2;
+# 			FDF.fdf=&LogL_dev12;
+# 		}
+# 
+# 		const gsl_root_fsolver_type *T_f;
+# 		gsl_root_fsolver *s_f;
+# 		T_f=gsl_root_fsolver_brent;
+# 		s_f=gsl_root_fsolver_alloc (T_f);
+# 
+# 		const gsl_root_fdfsolver_type *T_fdf;
+# 		gsl_root_fdfsolver *s_fdf;
+# 		T_fdf=gsl_root_fdfsolver_newton;
+# 		s_fdf=gsl_root_fdfsolver_alloc(T_fdf);
+# 
+# 		for (vector<double>::size_type i=0; i<lambda_lh.size(); ++i) {
+# 			lambda_l=lambda_lh[i].first; lambda_h=lambda_lh[i].second;
+# 
+# 			gsl_root_fsolver_set (s_f, &F, lambda_l, lambda_h);
+# 
+# 			do {
+# 				iter++;
+# 				status=gsl_root_fsolver_iterate (s_f);
+# 				l=gsl_root_fsolver_root (s_f);
+# 				lambda_l=gsl_root_fsolver_x_lower (s_f);
+# 				lambda_h=gsl_root_fsolver_x_upper (s_f);
+# 				status=gsl_root_test_interval (lambda_l, lambda_h, 0, 1e-1);
+# 			}
+# 			while (status==GSL_CONTINUE && iter<max_iter);
+# 
+# 			iter=0;
+# 
+# 			gsl_root_fdfsolver_set (s_fdf, &FDF, l);
+# 
+# 			do {
+# 				iter++;
+# 				status=gsl_root_fdfsolver_iterate (s_fdf);
+# 				l_temp=l;
+# 				l=gsl_root_fdfsolver_root (s_fdf);
+# 				status=gsl_root_test_delta (l, l_temp, 0, 1e-5);
+# 			}
+# 			while (status==GSL_CONTINUE && iter<max_iter && l>l_min && l<l_max);
+# 
+# 			l=l_temp;
+# 			if (l<l_min) {l=l_min;}
+# 			if (l>l_max) {l=l_max;}
+# 			if (func_name=='R' || func_name=='r') {logf_l=LogRL_f (l, &params);} else {logf_l=LogL_f (l, &params);}
+# 
+# 			if (i==0) {logf=logf_l; lambda=l;}
+# 			else if (logf<logf_l) {logf=logf_l; lambda=l;}
+# 			else {}
+# 		}
+# 		gsl_root_fsolver_free (s_f);
+# 		gsl_root_fdfsolver_free (s_fdf);
+# 
+# 		if (func_name=='R' || func_name=='r') {
+# 			logf_l=LogRL_f (l_min, &params);
+# 			logf_h=LogRL_f (l_max, &params);
+# 		}
+# 		else {
+# 			logf_l=LogL_f (l_min, &params);
+# 			logf_h=LogL_f (l_max, &params);
+# 		}
+# 
+# 		if (logf_l>logf) {lambda=l_min; logf=logf_l;}
+# 		if (logf_h>logf) {lambda=l_max; logf=logf_h;}
+# 	}
+# 
+# 	return;
+# }
+```
+
+### R code for `CalcPab`
+
+```{r}
+
+```
+
+
+### R code for `GetabIndex`
+
+```{r}
 
 ```
 
@@ -1211,15 +1530,22 @@ X <- Xtilde %*% U
 ```
 
 ```{r}
-Ytilde <- t(pheno[, c(2, 6)])
-Y <- Ytilde %*% U
+Ytilde <- t(pheno[, c(2, 6)]) %>% as.matrix()
+Ytilde[is.na(Ytilde)] <- 1/ 20
+ Y <- Ytilde %*% U
 ```
 
 
 
 
 ```{r}
-MphEM(func_name = "R", max_iter = 10, max_prec = 0.001, eval = eval, X = X, Y = Y)
+#out <- MphInitial(eval = eval, X = X, Y = Y)
+#V_g <- out[[1]]
+#V_e <- out[[2]]
+#B <- out[[3]]
+V_g <- diag(c(1, 1))
+V_e <- V_g
+MphEM(func_name = "R", max_iter = 10, max_prec = 0.001, eval = eval, X = X, Y = Y, V_g = V_g, V_e = V_e)
 ```
 
 
