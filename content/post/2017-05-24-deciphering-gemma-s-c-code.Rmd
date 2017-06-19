@@ -552,7 +552,7 @@ leads to each entry of `V_g` being divided by `n_size` (with the result stored a
 update_v <- function(eval, U, E, Sigma_uu, Sigma_ee){
   n_size <- length(eval)
   d_size <- nrow(U)
-  V_g <- matrix(0, nrow = n_size, ncol = n_size)
+  V_g <- matrix(0, nrow = d_size, ncol = d_size)
   V_e <- V_g
   for (k in 1:n_size){
     delta <- eval[k]
@@ -621,7 +621,7 @@ calc_sigma <- function(eval, D_l, X, OmegaU, OmegaE, UltVeh, Qi, func_name = "R"
   if (func_name == "R"){
     M_u <- matrix(0, nrow = dc_size, ncol = d_size)
     M_e <- M_u
-    Qi <- M_e
+    QiM <- M_e
     for (k in 1:n_size){
       delta <- eval[k]
       for (i in 1:d_size){
@@ -629,7 +629,7 @@ calc_sigma <- function(eval, D_l, X, OmegaU, OmegaE, UltVeh, Qi, func_name = "R"
         for (j in 1:c_size){
           x <- X[j, k]
           d <- x / (delta * dl + 1)
-          M_e[(j -1) * d_size + i, i] <- d
+          M_e[(j - 1) * d_size + i, i] <- d
           M_u[(j - 1) * d_size + i, i] <- d * dl
           
         }
@@ -888,7 +888,7 @@ MphEM <- function(func_name = "R", max_iter = 10000, max_prec = 1 / 1000, eval, 
     if (func_name=='R') {
 			logl_new<- logl_new - 0.5 * (lndetQ - c_size * logdet_Ve)
 		}
-	#	if (t > 1 & abs(logl_new - logl_old) < max_prec) {break}
+		if (t > 1 & abs(logl_new - logl_old) < max_prec) {break}
 		logl_old <- logl_new
 		co_out <- calc_omega(eval, D_l)
 		co_out[[1]] -> OmegaU
@@ -1545,7 +1545,7 @@ Ytilde[is.na(Ytilde)] <- 1/ 20
 #B <- out[[3]]
 V_g <- diag(c(1, 1))
 V_e <- V_g
-MphEM(func_name = "R", max_iter = 10, max_prec = 0.001, eval = eval, X = X, Y = Y, V_g = V_g, V_e = V_e)
+MphEM(func_name = "R", max_iter = 100, max_prec = 0.001, eval = eval, X = X, Y = Y, V_g = V_g, V_e = V_e)
 ```
 
 
