@@ -1,7 +1,7 @@
 ---
 title: Testing my R package
 author: Frederick Boehm
-date: '2017-06-20'
+date: '`r lubridate::now()`'
 slug: testing-my-r-package
 categories: [computing, R, packages]
 tags: [tests]

@@ -1,7 +1,7 @@
 ---
 title: Translating GEMMA’s Newton-Raphson Algorithm from C++ to R
 author: Frederick Boehm
-date: '2017-06-13'
+date: '`r lubridate::now()`'
 slug: translating-gemma-s-newton-raphson-algorithm-from-c-to-r
 draft: 'true'
 categories:
