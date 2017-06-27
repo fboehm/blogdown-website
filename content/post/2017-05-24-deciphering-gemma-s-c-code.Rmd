@@ -120,26 +120,6 @@ Since we're looping over `k`, it's as if we're taking the inner (dot) product of
 ### R code for calc_XHiY
 
 ```{r}
-calc_XHiY <- function(eval, D_l, X, UltVehiY){
-  n_size <- length(eval)
-  c_size <- nrow(X)
-  d_size <- length(D_l)
-  xHiy <- numeric(length = d_size * c_size)
-  for (i in 1:d_size){
-    dl <- D_l[i]
-    for (j in 1:c_size){
-      d <- 0
-      for (k in 1:n_size){
-        x <- X[j, k]
-        y <- UltVehiY[i, k]
-        delta <- eval[k]
-        d<- d + x * y / (delta * dl + 1)
-      }
-    }
-    xHiy[(j-1) * d_size + i] <- d
-  }
-  return(xHiy)
-}
 ```
 
 
@@ -164,28 +144,6 @@ I now see that the file lapack.cpp contains the code for the function `EigenDeco
 ### R code for eigen_proc
 
 ```{r}
-eigen_proc <- function(Vg, Ve){
-  eigenVe <- eigen(Ve)
-  eigenVe$values -> Dl
-  eigenVe$vectors -> Ul
-  log(Dl) %>% sum() -> logdet_Ve
-  V_e_h <- matrix(0, nrow = length(Dl), ncol = length(Dl))
-  V_e_hi <- V_e_h
-  for (i in 1:length(Dl)){
-    V_e_h <- V_e_h + sqrt(Dl)[i] * Ul[, i] %*% t(Ul[, i])
-    V_e_hi <- V_e_hi + Ul[, i] %*% t(Ul[, i]) /  sqrt(Dl)[i]
-  }
-  VgVehi <- Vg %*% V_e_hi
-  Lambda <- V_e_hi %*% VgVehi
-  eigen(Lambda) -> eigenLambda
-  Ul <- eigenLambda$vectors
-  Dl <- eigenLambda$values
-  Dl[Dl < 0] <- 0
-  UltVeh <- t(Ul) %*% V_e_h
-  UltVehi <- t(Ul) %*% V_e_hi
-  return(list(logdet_Ve, UltVeh, UltVehi, Dl))
-}
-
 ```
 
 
@@ -227,38 +185,6 @@ Lines to free the memory complete the function.
 ### calc_qi R code
 
 ```{r}
-calc_qi <- function(eval, D_l, X){
-  n_size <- length(eval)
-  d_size <- length(D_l)
-  c_size <- nrow(X)# what is c_size? it's the number of rows in the transposed genotypes matrix
-  # transposed genotypes matrix is c by n
-  dc_size <- d_size * c_size
-  Q <- matrix(0, nrow = dc_size, ncol = dc_size)
-  
-  for (i in 1:c_size){
-    for (j in 1:c_size){
-      for (l in 1:d_size){
-        dl <- D_l[l]
-        if (j < i){
-          d <- Q[(j - 1) * d_size + l, (i - 1) * d_size + l]
-        } else {
-          d <- 0
-          for (k in 1:n_size){
-            d1 <- X[i, k]
-            d2 <- X[j, k]
-            delta <- eval[k]
-            d <- d + d1 * d2 / (dl * delta + 1)
-          }
-        }
-        Q[(i -1) * d_size + l, (j - 1) * d_size + l] <- d
-      }
-    }
-  }
-  Qi <- solve(Q)
-  detQ <- det(Q)
-  lndetQ <- log(detQ)
-  return(list(Qi, lndetQ))
-}
 ```
 
 
@@ -276,23 +202,6 @@ They define the matrices `OmegaU` and `OmegaE`. Note that the two omega matrices
 ### calc_omega R code
 
 ```{r, eval = TRUE}
-calc_omega <- function(eval, D_l){
-  n_size <- length(eval)
-  d_size <- length(D_l)
-  OmegaU <- matrix(nrow = d_size, ncol = n_size)
-  OmegaE <- OmegaU
-  for (k in 1:n_size){
-    delta <- eval[k]
-    for (i in 1:d_size){
-      dl <- D_l[i]
-      d_u <- dl / (delta * dl + 1)
-      d_e <- d_u * delta
-      OmegaU[i, k] <- d_u
-      OmegaE[i, k] <- d_e
-    }
-  }
-  return(list(OmegaU, OmegaE))
-}
 ```
 
 
@@ -314,12 +223,6 @@ The last line of `UpdateU` contains a call to [`gsl_matrix_mul_elements`](https:
 ### R Code for update_u
 
 ```{r}
-update_u <- function(OmegaE, UltVehiY, UltVehiBX){
-  UltVehiU <- UltVehiY
-  UltVehiU <- UltVehiU - UltVehiBX
-  UltVehiU <- UltVehiU * OmegaE
-  return(UltVehiU)
-}
 
 ```
 
@@ -336,12 +239,6 @@ First, note that `gsl_matrix_memcpy` copies the second argument's elements to th
 ### R code for update_e
 
 ```{r}
-update_e <- function(UltVehiY, UltVehiBX, UltVehiU){
-  UltVehiY -> UltVehiE
-  UltVehiE <- UltVehiE - UltVehiBX
-  UltVehiE <- UltVehiE - UltVehiU
-  return(UltVehiE)
-}
 ```
 
 
@@ -452,18 +349,6 @@ Together, the lines contained in the `for` loop serve to copy the elements of th
 
 
 ```{r}
-UpdateRL_B <- function(xHiy, Qi, d_size = 2){
-  nrow(Qi) -> dc_size
-  c_size <- dc_size / d_size
-  b <- vector(length = dc_size)
-  b <- Qi %*% xHiy
-  UltVehiB <- matrix(nrow = d_size, ncol = c_size)
-  for (i in 1:c_size){
-    b_subcol <- b[(1 + (i - 1) * d_size):(i * d_size)]
-    b_subcol -> UltVehiB[, i] # could use as.matrix here
-  }
-  return(UltVehiB)
-}
 ```
 
 
@@ -549,25 +434,6 @@ leads to each entry of `V_g` being divided by `n_size` (with the result stored a
 ### R code for update_v
 
 ```{r}
-update_v <- function(eval, U, E, Sigma_uu, Sigma_ee){
-  n_size <- length(eval)
-  d_size <- nrow(U)
-  V_g <- matrix(0, nrow = d_size, ncol = d_size)
-  V_e <- V_g
-  for (k in 1:n_size){
-    delta <- eval[k]
-    if (delta != 0){
-      U_col <- U[, k]
-      V_g <- V_g + U_col %*% t(U_col) / delta
-    }
-  }
-  V_e <- E %*% t(E)
-  V_g <- V_g + Sigma_uu
-  V_e <- V_e + Sigma_ee
-  V_g <- V_g / n_size
-  V_e <- V_e / n_size
-  return(list(V_e, V_g))
-}
 ```
 
 
@@ -605,47 +471,6 @@ We then have [four matrix multiplication operations](https://github.com/xiangzho
 ### R code for calc_sigma
 
 ```{r}
-calc_sigma <- function(eval, D_l, X, OmegaU, OmegaE, UltVeh, Qi, func_name = "R"){
-  n_size <- length(eval)
-  c_size <- nrow(X)
-  d_size <- length(D_l)
-  dc_size <- nrow(Qi)
-  Sigma_ee <- matrix(0, nrow = d_size, ncol = d_size)
-  Sigma_uu <- Sigma_ee
-  for (k in 1:n_size){
-    OmegaU_col <- OmegaU[, k]
-    OmegaE_col <- OmegaE[, k]
-    diag(Sigma_ee) <- diag(Sigma_ee) + OmegaE_col
-    diag(Sigma_uu) <- diag(Sigma_uu) + OmegaU_col
-  }
-  if (func_name == "R"){
-    M_u <- matrix(0, nrow = dc_size, ncol = d_size)
-    M_e <- M_u
-    QiM <- M_e
-    for (k in 1:n_size){
-      delta <- eval[k]
-      for (i in 1:d_size){
-        dl <- D_l[i]
-        for (j in 1:c_size){
-          x <- X[j, k]
-          d <- x / (delta * dl + 1)
-          M_e[(j - 1) * d_size + i, i] <- d
-          M_u[(j - 1) * d_size + i, i] <- d * dl
-          
-        }
-      }
-      QiM <- Qi %*% M_u
-      Sigma_uu <- Sigma_uu + t(M_u) %*% QiM * delta
-      QiM <- Qi %*% M_e
-      Sigma_ee <- Sigma_ee + t(M_e) %*% QiM
-    }
-  }
-  M <- Sigma_uu %*% UltVeh
-  Sigma_uu <- t(UltVeh) %*% M
-  M <- Sigma_ee %*% UltVeh
-  Sigma_ee <- t(UltVeh) %*% M
-  return(list(Sigma_ee, Sigma_uu))
-}
 ```
 
 
@@ -825,26 +650,6 @@ size_t n_size=eval->size, d_size=D_l->size, dc_size=Qi->size1;
 ### R code for MphCalcLogL
 
 ```{r}
-MphCalcLogL <- function(eval, D_l, Qi, UltVehiY, xHiy){
-  n_size <- length(eval)
-  d_size <- length(D_l)
-  dc_size <- nrow(Qi)
-  logl <- 0
-  for (k in 1:n_size){
-    delta <- eval[k]
-    for (i in 1:d_size){
-      y <- UltVehiY[i, k]
-      is.na(y)
-      dl <- D_l[i]
-      d <- delta * dl + 1
-      logl <- logl + y^2 / d + log(d)
-    }
-  }
-  Qiv <- Qi %*% xHiy
-  d <- t(xHiy) %*% Qiv
-  logl <- logl - d
-  return(- 0.5 * logl)
-}
 ```
 
 
@@ -852,66 +657,6 @@ MphCalcLogL <- function(eval, D_l, Qi, UltVehiY, xHiy){
 ### R code for MphEM
 
 ```{r}
-MphEM <- function(func_name = "R", max_iter = 10000, max_prec = 1 / 1000, eval, X, Y, V_g, V_e){
-  n_size <- length(eval)
-  c_size <- nrow(X)
-  d_size <- nrow(Y)
-  dc_size <- c_size * d_size
-  # calculate XXt and XXti
-  XXt <- X %*% t(X)
-  XXti <- solve(XXt)
-  # calculate constant for logl
-  if (func_name == "R"){
-    logl_const <- (n_size - c_size) * d_size * log(2 * pi) / 2 + d_size * log(det(XXt)) / 2
-  } else {
-    logl_const <- n_size * d_size * log(2 * pi) / 2 
-  }
-  out <- list()
-  logl_old <- 1 # we need to define logl_old before using it within the EM iterations
-  # start EM
-  for (t in 1:max_iter){
-    # eigen_proc
-    ep_out <- eigen_proc(Vg = V_g, Ve = V_e)
-    ep_out[[1]] -> logdet_Ve
-    ep_out[[2]] -> UltVeh
-    ep_out[[3]] -> UltVehi
-    ep_out[[4]] -> D_l
-    # calc_qi
-    cq_out <- calc_qi(eval, D_l, X)
-    cq_out[[1]] -> Qi
-    cq_out[[2]] -> lndetQ
-    # 
-    UltVehiY <- UltVehi %*% Y
-    # 
-    xHiy <- calc_XHiY(eval, D_l, X, UltVehiY)
-    logl_new <- logl_const + MphCalcLogL(eval = eval, xHiy = xHiy, D_l = D_l, UltVehiY = UltVehiY, Qi = Qi) - 0.5 * n_size * logdet_Ve
-    if (func_name=='R') {
-			logl_new<- logl_new - 0.5 * (lndetQ - c_size * logdet_Ve)
-		}
-		if (t > 1 & abs(logl_new - logl_old) < max_prec) {break}
-		logl_old <- logl_new
-		co_out <- calc_omega(eval, D_l)
-		co_out[[1]] -> OmegaU
-		co_out[[2]] -> OmegaE
-		if (func_name == 'R') {
-			UltVehiB <- UpdateRL_B(xHiy, Qi)
-			UltVehiBX <- UltVehiB %*% X
-		}
-		UltVehiU <- update_u(OmegaE, UltVehiY, UltVehiBX)
-		UltVehiE <- update_e(UltVehiY, UltVehiBX, UltVehiU)
-		U_hat <- t(UltVeh) %*% UltVehiU
-		E_hat <- t(UltVeh) %*% UltVehiE
-		B <- t(UltVeh) %*% UltVehiB 
-		cs_out <- calc_sigma(func_name = func_name, eval = eval, D_l = D_l, X = X, OmegaU = OmegaU, OmegaE = OmegaE, UltVeh = UltVeh, Qi = Qi)
-		cs_out[[1]] -> Sigma_uu
-		cs_out[[2]] -> Sigma_ee
-		uv_out <- update_v(eval, U_hat, E_hat, Sigma_uu, Sigma_ee)
-		uv_out[[1]] -> V_g
-		uv_out[[2]] -> V_e
-		out[[t]] <- list(logl_new, V_g, V_e)
-  }
-  return(out)
-}
 ```
 
 ### R code for MphInitial
@@ -1504,6 +1249,7 @@ CalcLambda <- function(func_name = "R", params, l_min, l_max, n_region){
 First, we read in the GEMMA example data.
 
 ```{r}
+library(gemma2)
 library(readr)
 library(tidyverse)
 anno <- read_delim("~/GEMMA/example/mouse_hs1940.anno.txt", delim = "\t", col_names = c("rs_id", "position", "chromosome", "cM"))
