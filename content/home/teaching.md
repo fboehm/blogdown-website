@@ -14,9 +14,14 @@ weight = 60
 
 +++
 
-I have taught the following semester-long courses:
+I have taught these semester-long courses:
 
-Applied statistics for engineers  
-Applied statistics for biologists  
-Introduction to statistics  
+- Applied statistics for engineers  
+- Applied statistics for biologists  
+- Introduction to statistics  
+- The College Classroom: How to Teach Inclusively for Educating a Diverse Nation
 
+I've also taught these short courses and workshops:
+
+- [Data Carpentry](https://uw-madison-aci.github.io/2017-06-19-uwmadison-dc/)  
+- Data analysis with topic models  
