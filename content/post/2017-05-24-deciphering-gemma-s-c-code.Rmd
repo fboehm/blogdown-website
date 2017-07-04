@@ -3,7 +3,6 @@ title: Deciphering GEMMA’s C++ Code
 author: Frederick Boehm
 date: '`r lubridate::now()`'
 slug: deciphering-gemma-s-c-code
-draft: 'true'
 categories:
   - Computing
 tags:
