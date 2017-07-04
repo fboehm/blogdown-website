@@ -1,7 +1,7 @@
 ---
 title: John Roberts's Commencement Address
 author: Frederick Boehm
-date: '`r lubridate::now()`'
+date: '2017-07-03'
 slug: john-roberts-s-commencement-address
 categories: [academics]
 tags: [commencement, Bob Dylan]
