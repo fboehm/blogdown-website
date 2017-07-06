@@ -4,7 +4,7 @@ author: Frederick Boehm
 date: '`r lubridate::now()`'
 slug: testing-my-r-package
 categories: [computing, R, packages]
-tags: [tests]
+tags: [testing]
 draft: 'true'
 ---
 
