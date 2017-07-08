@@ -10,4 +10,5 @@ draft: 'true'
 
 I am assembling a package that implements an EM algorithm. I want to think about how I know whether the code works.
 
-In looking at resources on testing, I found particularly helpful Karl Broman's [slides](http://kbroman.org/Tools4RR/assets/lectures/09_testdebug_withnotes.pdf) on testing R code. Hadley Wickham's book Advanced R has a [chapter on testing](http://r-pkgs.had.co.nz/tests.html).
+In looking at resources on testing, I found particularly helpful Karl Broman's [slides](http://kbroman.org/Tools4RR/assets/lectures/09_testdebug_withnotes.pdf) on testing R code. Hadley Wickham's book Advanced R has a useful [chapter on testing](http://r-pkgs.had.co.nz/tests.html).
+
