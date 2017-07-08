@@ -150,7 +150,7 @@ defaultContentLanguageInSubdir = false
 
   [[params.social]]
     icon = "figshare"
-    icon_pack = "fa"
+    icon_pack = "ai"
     link = "https://figshare.com/authors/_/2919734"
 
 
