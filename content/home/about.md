@@ -13,9 +13,9 @@ weight = 1
 [interests]
   interests = [
     "Biostatistics",
-    "Statistical Genetics",
     "Quantitative Trait Locus Mapping",
-    "Scholarship of Teaching and Learning"
+    "Scholarship of Teaching and Learning",
+    "Medicine"
   ]
 
 # List your qualifications (such as academic degrees).
