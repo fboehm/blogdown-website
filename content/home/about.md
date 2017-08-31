@@ -13,6 +13,7 @@ weight = 1
 [interests]
   interests = [
     "Biostatistics",
+    "Systems Genetics"
     "Quantitative Trait Locus Mapping",
     "Scholarship of Teaching and Learning",
     "Medicine", 
