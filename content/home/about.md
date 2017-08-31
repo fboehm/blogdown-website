@@ -45,4 +45,4 @@ weight = 1
 
 # Biography
 
-Frederick Boehm is a systems genetics researcher and teacher who lives in Madison, Wisconsin. 
+Frederick Boehm is a systems genetics & data science researcher and teacher who lives in Madison, Wisconsin. 

@@ -21,7 +21,7 @@ defaultContentLanguageInSubdir = false
 
 [params]
   name = "Frederick Boehm"
-  role = "Biostatistics researcher and teacher"
+  role = "Systems genetics and data science researcher and teacher"
   organization = "University of Wisconsin-Madison"
   organization_url = "http://www.wisc.edu"
   avatar = "boehm.png"
