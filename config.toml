@@ -153,6 +153,10 @@ defaultContentLanguageInSubdir = false
     icon_pack = "ai"
     link = "https://figshare.com/authors/_/2919734"
 
+  [[params.social]]
+    icon = "orcid"
+    icon_pack = "ai"
+    link = "https://orcid.org/0000-0002-1644-5931"
 
 
 # Navigation Links
