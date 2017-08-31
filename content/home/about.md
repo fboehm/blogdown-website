@@ -15,7 +15,8 @@ weight = 1
     "Biostatistics",
     "Quantitative Trait Locus Mapping",
     "Scholarship of Teaching and Learning",
-    "Medicine"
+    "Medicine", 
+    "Reproducible Research"
   ]
 
 # List your qualifications (such as academic degrees).
