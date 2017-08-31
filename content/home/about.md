@@ -13,7 +13,7 @@ weight = 1
 [interests]
   interests = [
     "Biostatistics",
-    "Systems Genetics"
+    "Systems Genetics", 
     "Quantitative Trait Locus Mapping",
     "Scholarship of Teaching and Learning",
     "Medicine", 
@@ -45,4 +45,4 @@ weight = 1
 
 # Biography
 
-Frederick Boehm is a systems genetics & data science researcher and teacher who lives in Madison, Wisconsin. 
+Frederick Boehm is a systems genetics \& data science researcher and teacher who lives in Madison, Wisconsin. 
