@@ -17,7 +17,7 @@ weight = 1
     "Quantitative Trait Locus Mapping",
     "Scholarship of Teaching and Learning",
     "Medicine", 
-    "Reproducible Research"
+    "Methods for Reproducible Research"
   ]
 
 # List your qualifications (such as academic degrees).
