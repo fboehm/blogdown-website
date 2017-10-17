@@ -3,7 +3,7 @@ title: R code profiling saves the day!
 author: Frederick Boehm
 date: '2017-10-16'
 slug: r-code-profiling-saves-the-day
-draft: 'true'
+draft: 'false'
 categories:
   - computing
 tags:
